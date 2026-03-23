@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi Livraison — Flivo</title>
+
+<!-- ✅ Config centrale — ne pas toucher -->
+<script src="config.js"></script>
+<!-- ✅ Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f12; --card: #18181f; --border: #2a2a36;
+    --orange: #ff6b2b; --orange-soft: rgba(255,107,43,0.12);
+    --green: #22c55e; --green-soft: rgba(34,197,94,0.1);
+    --text: #f0ede8; --muted: #7a7890; --radius: 18px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh; display: flex;
+    flex-direction: column; align-items: center; padding: 0 0 40px;
+  }
+  .topbar { width:100%; display:flex; align-items:center; justify-content:space-between; padding: 20px 22px 0; }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:var(--orange); }
+  .order-id { font-size:0.72rem; color:var(--muted); background:var(--card); border:1px solid var(--border); padding:5px 10px; border-radius:30px; font-family:monospace; }
+  .hero { width:calc(100% - 32px); max-width:420px; margin:20px auto 0; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:22px; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; top:-40px; right:-40px; width:140px; height:140px; background:radial-gradient(circle,rgba(255,107,43,0.18) 0%,transparent 70%); pointer-events:none; }
+  .boutique-name { font-size:0.72rem; color:var(--muted); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.08em; }
+  .client-name { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:700; line-height:1.2; margin-bottom:14px; }
+  .client-name span { color:var(--orange); }
+  .address-row { display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,0.03); border-radius:10px; padding:12px; border:1px solid var(--border); }
+  .address-icon { font-size:1.1rem; flex-shrink:0; margin-top:1px; }
+  .address-text { font-size:0.85rem; color:#c9c6d4; line-height:1.5; }
+  .address-text strong { display:block; color:var(--text); font-weight:500; margin-bottom:2px; }
+  .status-badge { display:inline-flex; align-items:center; gap:7px; margin-top:16px; background:var(--green-soft); border:1px solid rgba(34,197,94,0.25); color:var(--green); font-size:0.78rem; font-weight:500; padding:6px 12px; border-radius:30px; transition:all 0.4s; }
+  .status-badge.in-progress { background:var(--orange-soft); border-color:rgba(255,107,43,0.25); color:var(--orange); }
+  .dot-pulse { width:7px; height:7px; border-radius:50%; background:currentColor; animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  .section-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:24px 22px 10px; width:calc(100% - 44px); max-width:420px; }
+  .timeline { width:calc(100% - 32px); max-width:420px; margin:0 auto; }
+  .step { display:flex; align-items:flex-start; gap:16px; }
+  .step-left { display:flex; flex-direction:column; align-items:center; flex-shrink:0; width:36px; }
+  .step-circle { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; border:2px solid var(--border); background:var(--card); z-index:1; transition:all 0.4s; }
+  .step-circle.done { background:var(--green); border-color:var(--green); }
+  .step-circle.active { background:var(--orange); border-color:var(--orange); box-shadow:0 0 0 6px rgba(255,107,43,0.15); }
+  .step-circle.pending { opacity:0.5; }
+  .step-line { width:2px; flex:1; min-height:28px; background:var(--border); margin:2px 0; transition:background 0.4s; }
+  .step-line.done { background:var(--green); }
+  .step-line.active { background:linear-gradient(to bottom,var(--orange),var(--border)); }
+  .step-content { flex:1; padding-top:6px; padding-bottom:30px; }
+  .step:last-child .step-content { padding-bottom:0; }
+  .step-title { font-family:'Syne',sans-serif; font-size:0.92rem; font-weight:600; margin-bottom:3px; transition:color 0.3s; }
+  .step-title.done { color:var(--green); }
+  .step-title.active { color:var(--orange); }
+  .step-title.pending { color:var(--muted); }
+  .step-desc { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+  .step-time { font-size:0.7rem; color:var(--muted); margin-top:4px; font-style:italic; }
+  .livreur-card { width:calc(100% - 32px); max-width:420px; margin:0 auto; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; display:flex; align-items:center; gap:16px; }
+  .livreur-avatar { width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg,#ff6b2b,#ff9a3c); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+  .livreur-info { flex:1; }
+  .livreur-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:3px; }
+  .livreur-name { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; }
+  .livreur-vehicle { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+  .call-btn { width:44px; height:44px; border-radius:50%; background:var(--green-soft); border:1px solid rgba(34,197,94,0.2); color:var(--green); font-size:1.15rem; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; flex-shrink:0; transition:all 0.2s; }
+  .call-btn:hover { background:rgba(34,197,94,0.2); transform:scale(1.05); }
+  .wa-btn { display:flex; align-items:center; justify-content:center; gap:10px; width:calc(100% - 32px); max-width:420px; margin:0 auto; padding:16px; background:#25D366; border-radius:var(--radius); color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem; text-decoration:none; border:none; cursor:pointer; transition:opacity 0.2s,transform 0.15s; }
+  .wa-btn:hover { opacity:0.92; transform:translateY(-1px); }
+  .amount-row { width:calc(100% - 32px); max-width:420px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 18px; }
+  .amount-label { font-size:0.8rem; color:var(--muted); }
+  .amount-value { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; color:var(--orange); }
+  .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:60vh; gap:12px; color:var(--muted); font-size:0.9rem; }
+  .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .error-box { width:calc(100% - 32px); max-width:420px; margin:40px auto; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:var(--radius); padding:24px; text-align:center; }
+  .error-box h3 { font-family:'Syne',sans-serif; color:#ef4444; margin-bottom:8px; }
+  .error-box p { font-size:0.82rem; color:var(--muted); }
+  .gap-md { height:16px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo" id="appName">Flivo</div>
+  <div class="order-id" id="orderCode">Chargement...</div>
+</div>
+
+<div id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <span>Chargement de votre livraison...</span>
+  </div>
+</div>
+
+<script>
+// ── Init depuis config.js ─────────────────────────
+const sb = window.supabase.createClient(
+  FLIVO_CONFIG.supabase_url,
+  FLIVO_CONFIG.supabase_anon_key
+)
+document.getElementById('appName').textContent = FLIVO_CONFIG.app_name
+
+const params = new URLSearchParams(window.location.search)
+const code = params.get('code')
+
+const STATUTS = {
+  label: ['Commande reçue','Colis en préparation','En route vers vous','Livraison effectuée ✓','Échec livraison'],
+  cls:   ['','in-progress','in-progress','','in-progress'],
+  steps: [
+    { icon:'📦', title:'Commande confirmée', desc:'La boutique a validé votre commande' },
+    { icon:'📦', title:'Colis prêt',         desc:'Colis préparé et remis au livreur'  },
+    { icon:'🛵', title:'En route',           desc:'Le livreur est en chemin vers vous' },
+    { icon:'🏁', title:'Livré',              desc:'Colis remis au destinataire'        },
+  ]
+}
+
+function formatHeure(dateStr) {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  return `Aujourd'hui à ${d.getHours()}h${String(d.getMinutes()).padStart(2,'0')}`
+}
+
+function formatMontant(n) {
+  return Number(n).toLocaleString('fr-FR') + ' FCFA'
+}
+
+function buildTimeline(statut, liv) {
+  const tl = document.getElementById('timeline')
+  if (!tl) return
+  let html = ''
+  STATUTS.steps.forEach((s, i) => {
+    const isLast = i === STATUTS.steps.length - 1
+    let circleCls, titleCls, lineCls, icon, desc, time
+    if (i < statut) {
+      circleCls='done'; titleCls='done'; lineCls='done'; icon='✓'
+      desc=s.desc; time=formatHeure(liv.created_at)
+    } else if (i === statut) {
+      circleCls='active'; titleCls='active'; lineCls='active'; icon=s.icon
+      desc=s.desc; time=formatHeure(liv.updated_at)
+    } else {
+      circleCls='pending'; titleCls='pending'; lineCls=''; icon=s.icon
+      desc='En attente'; time='—'
+    }
+    html += `
+      <div class="step">
+        <div class="step-left">
+          <div class="step-circle ${circleCls}">${icon}</div>
+          ${!isLast ? `<div class="step-line ${lineCls}"></div>` : ''}
+        </div>
+        <div class="step-content">
+          <div class="step-title ${titleCls}">${s.title}</div>
+          <div class="step-desc">${desc}</div>
+          <div class="step-time">${time}</div>
+        </div>
+      </div>`
+  })
+  tl.innerHTML = html
+}
+
+function updateBadge(statut) {
+  const badge = document.getElementById('statusBadge')
+  const text  = document.getElementById('statusText')
+  if (!badge || !text) return
+  badge.className = 'status-badge ' + STATUTS.cls[statut]
+  text.textContent = STATUTS.label[statut]
+}
+
+function render(liv) {
+  const statut = liv.statut || 0
+  document.getElementById('orderCode').textContent = '#' + liv.code
+  document.getElementById('app').innerHTML = `
+    <div class="gap-md"></div>
+    <div class="hero">
+      <div class="boutique-name">${liv.boutique_nom || 'Boutique'}</div>
+      <div class="client-name">Livraison pour <span>${liv.client_nom}</span></div>
+      <div class="address-row">
+        <div class="address-icon">📍</div>
+        <div class="address-text">
+          <strong>Adresse de livraison</strong>
+          ${liv.adresse}
+        </div>
+      </div>
+      <div class="status-badge ${STATUTS.cls[statut]}" id="statusBadge">
+        <div class="dot-pulse"></div>
+        <span id="statusText">${STATUTS.label[statut]}</span>
+      </div>
+    </div>
+    <div class="gap-md"></div>
+    <div class="amount-row">
+      <div class="amount-label">Montant à payer à la livraison</div>
+      <div class="amount-value">${formatMontant(liv.montant)}</div>
+    </div>
+    <div class="section-label">Suivi de votre commande</div>
+    <div class="timeline" id="timeline"></div>
+    <div class="section-label">Votre livreur</div>
+    <div class="livreur-card">
+      <div class="livreur-avatar">🧑🏾</div>
+      <div class="livreur-info">
+        <div class="livreur-label">Livreur assigné</div>
+        <div class="livreur-name">${liv.livreur_nom}</div>
+        <div class="livreur-vehicle">🛵 Moto</div>
+      </div>
+      <a class="call-btn" href="tel:${liv.livreur_phone}" title="Appeler">📞</a>
+    </div>
+    <div class="gap-md"></div>
+    <a class="wa-btn"
+       href="https://wa.me/${liv.livreur_phone}?text=Bonjour%20${encodeURIComponent(liv.livreur_nom)}%2C%20je%20vous%20attends%20pour%20la%20livraison%20%23${liv.code}"
+       target="_blank">
+      💬 Contacter ${liv.livreur_nom} sur WhatsApp
+    </a>
+    <div class="gap-md"></div>
+  `
+  buildTimeline(statut, liv)
+}
+
+function listenRealtime(liv) {
+  sb.channel('livraison-' + liv.id)
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'livraisons',
+      filter: `id=eq.${liv.id}`
+    }, (payload) => {
+      liv.statut = payload.new.statut
+      liv.updated_at = payload.new.updated_at
+      buildTimeline(liv.statut, liv)
+      updateBadge(liv.statut)
+    })
+    .subscribe()
+}
+
+async function load() {
+  if (!code) {
+    document.getElementById('app').innerHTML = `
+      <div class="error-box">
+        <h3>Lien invalide</h3>
+        <p>Ce lien de suivi n'est pas valide.<br>Vérifiez le lien reçu sur WhatsApp.</p>
+      </div>`
+    return
+  }
+  const { data, error } = await sb
+    .from('livraisons')
+    .select('*')
+    .eq('code', code)
+    .single()
+
+  if (error || !data) {
+    document.getElementById('app').innerHTML = `
+      <div class="error-box">
+        <h3>Livraison introuvable</h3>
+        <p>Aucune livraison trouvée pour le code <strong>${code}</strong>.</p>
+      </div>`
+    return
+  }
+  render(data)
+  listenRealtime(data)
+}
+
+load()
+</script>
+</body>
+</html>

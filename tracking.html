@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi Livraison</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f12;
+    --card: #18181f;
+    --border: #2a2a36;
+    --orange: #ff6b2b;
+    --orange-soft: rgba(255,107,43,0.12);
+    --green: #22c55e;
+    --green-soft: rgba(34,197,94,0.1);
+    --text: #f0ede8;
+    --muted: #7a7890;
+    --radius: 18px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 40px;
+  }
+
+  /* Top bar */
+  .topbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 22px 0;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--orange);
+    letter-spacing: -0.02em;
+  }
+  .order-id {
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 30px;
+    font-family: monospace;
+  }
+
+  /* Hero card */
+  .hero {
+    width: calc(100% - 32px);
+    max-width: 420px;
+    margin: 20px auto 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(255,107,43,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .boutique-name {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .client-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .client-name span { color: var(--orange); }
+
+  .address-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+  .address-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .address-text {
+    font-size: 0.85rem;
+    color: #c9c6d4;
+    line-height: 1.5;
+  }
+  .address-text strong {
+    display: block;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 16px;
+    background: var(--green-soft);
+    border: 1px solid rgba(34,197,94,0.25);
+    color: var(--green);
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 30px;
+    transition: all 0.4s ease;
+  }
+  .status-badge.in-progress {
+    background: var(--orange-soft);
+    border-color: rgba(255,107,43,0.25);
+    color: var(--orange);
+  }
+  .dot-pulse {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* Section title */
+  .section-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin: 24px 22px 10px;
+    width: calc(100% - 44px);
+    max-width: 420px;
+  }
+
+  /* Timeline */
+  .timeline {
+    width: calc(100% - 32px);
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+    padding-bottom: 6px;
+  }
+  .step:last-child { padding-bottom: 0; }
+
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 36px;
+  }
+  .step-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    border: 2px solid var(--border);
+    background: var(--card);
+    transition: all 0.4s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .step-circle.done {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .step-circle.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    box-shadow: 0 0 0 6px rgba(255,107,43,0.15);
+  }
+  .step-circle.pending {
+    background: var(--card);
+    border-color: var(--border);
+    opacity: 0.5;
+  }
+  .step-line {
+    width: 2px;
+    flex: 1;
+    min-height: 28px;
+    background: var(--border);
+    margin: 2px 0;
+    transition: background 0.4s ease;
+  }
+  .step-line.done { background: var(--green); }
+  .step-line.active {
+    background: linear-gradient(to bottom, var(--orange), var(--border));
+  }
+
+  .step-content {
+    flex: 1;
+    padding-top: 6px;
+    padding-bottom: 30px;
+  }
+  .step:last-child .step-content { padding-bottom: 0; }
+
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin-bottom: 3px;
+    transition: color 0.3s;
+  }
+  .step-title.done { color: var(--green); }
+  .step-title.active { color: var(--orange); }
+  .step-title.pending { color: var(--muted); }
+
+  .step-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .step-time {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* Livreur card */
+  .livreur-card {
+    width: calc(100% - 32px);
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .livreur-avatar {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b2b, #ff9a3c);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .livreur-info { flex: 1; }
+  .livreur-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  .livreur-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .livreur-vehicle {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .call-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    border: 1px solid rgba(34,197,94,0.2);
+    color: var(--green);
+    font-size: 1.15rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .call-btn:hover { background: rgba(34,197,94,0.2); transform: scale(1.05); }
+
+  /* WhatsApp button */
+  .wa-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: calc(100% - 32px);
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 16px;
+    background: #25D366;
+    border-radius: var(--radius);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .wa-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .wa-icon { font-size: 1.2rem; }
+
+  /* Amount */
+  .amount-row {
+    width: calc(100% - 32px);
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+  }
+  .amount-label { font-size: 0.8rem; color: var(--muted); }
+  .amount-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  /* Demo controls */
+  .demo-controls {
+    width: calc(100% - 32px);
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 14px 16px;
+    background: rgba(255,107,43,0.05);
+    border: 1px dashed rgba(255,107,43,0.3);
+    border-radius: 12px;
+    text-align: center;
+  }
+  .demo-controls p {
+    font-size: 0.73rem;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .demo-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .demo-btn {
+    font-size: 0.72rem;
+    padding: 7px 13px;
+    border-radius: 30px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .demo-btn:hover, .demo-btn.active {
+    border-color: var(--orange);
+    color: var(--orange);
+    background: var(--orange-soft);
+  }
+
+  .gap-sm { height: 10px; }
+  .gap-md { height: 16px; }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="logo">TrackLiv</div>
+  <div class="order-id">#TRK-20483</div>
+</div>
+
+<!-- Hero -->
+<div class="gap-md"></div>
+<div class="hero">
+  <div class="boutique-name">Boutique Awa Fashion</div>
+  <div class="client-name">Livraison pour <span id="clientName">Aminata Diallo</span></div>
+  <div class="address-row">
+    <div class="address-icon">📍</div>
+    <div class="address-text">
+      <strong>Adresse de livraison</strong>
+      Cocody Riviera 3, près du carrefour Shell, Abidjan
+    </div>
+  </div>
+  <div class="status-badge in-progress" id="statusBadge">
+    <div class="dot-pulse"></div>
+    <span id="statusText">En route vers vous</span>
+  </div>
+</div>
+
+<!-- Amount -->
+<div class="gap-md"></div>
+<div class="amount-row">
+  <div class="amount-label">Montant à payer à la livraison</div>
+  <div class="amount-value">12 500 FCFA</div>
+</div>
+
+<!-- Timeline -->
+<div class="section-label">Suivi de votre commande</div>
+<div class="timeline">
+
+  <div class="step" id="step0">
+    <div class="step-left">
+      <div class="step-circle done" id="circle0">✓</div>
+      <div class="step-line done" id="line0"></div>
+    </div>
+    <div class="step-content">
+      <div class="step-title done" id="title0">Commande confirmée</div>
+      <div class="step-desc">Awa Fashion a validé votre commande</div>
+      <div class="step-time">Aujourd'hui à 09h14</div>
+    </div>
+  </div>
+
+  <div class="step" id="step1">
+    <div class="step-left">
+      <div class="step-circle done" id="circle1">✓</div>
+      <div class="step-line done" id="line1"></div>
+    </div>
+    <div class="step-content">
+      <div class="step-title done" id="title1">Colis prêt</div>
+      <div class="step-desc">Votre colis a été préparé et remis au livreur</div>
+      <div class="step-time">Aujourd'hui à 10h32</div>
+    </div>
+  </div>
+
+  <div class="step" id="step2">
+    <div class="step-left">
+      <div class="step-circle active" id="circle2">🛵</div>
+      <div class="step-line active" id="line2"></div>
+    </div>
+    <div class="step-content">
+      <div class="step-title active" id="title2">En route</div>
+      <div class="step-desc" id="desc2">Moussa est en chemin vers votre adresse</div>
+      <div class="step-time" id="time2">Aujourd'hui à 11h05 · En cours...</div>
+    </div>
+  </div>
+
+  <div class="step" id="step3">
+    <div class="step-left">
+      <div class="step-circle pending" id="circle3">🏁</div>
+    </div>
+    <div class="step-content" style="padding-bottom:0">
+      <div class="step-title pending" id="title3">Livré</div>
+      <div class="step-desc" id="desc3">En attente de confirmation</div>
+      <div class="step-time" id="time3">—</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Livreur -->
+<div class="section-label">Votre livreur</div>
+<div class="livreur-card">
+  <div class="livreur-avatar">🧑🏾</div>
+  <div class="livreur-info">
+    <div class="livreur-label">Livreur assigné</div>
+    <div class="livreur-name">Moussa Koné</div>
+    <div class="livreur-vehicle">🛵 Moto · Note 4.8 ⭐</div>
+  </div>
+  <a class="call-btn" href="tel:+2250708000000" title="Appeler Moussa">📞</a>
+</div>
+
+<!-- WhatsApp -->
+<div class="gap-md"></div>
+<a class="wa-btn" href="https://wa.me/2250708000000?text=Bonjour%20Moussa%2C%20je%20vous%20attends%20pour%20la%20livraison%20commande%20%23TRK-20483" target="_blank">
+  <span class="wa-icon">💬</span>
+  Contacter Moussa sur WhatsApp
+</a>
+
+<!-- Demo controls -->
+<div class="gap-md"></div>
+<div class="demo-controls">
+  <p>🎮 Simuler l'évolution du statut (démo)</p>
+  <div class="demo-btns">
+    <button class="demo-btn" onclick="setStatus(0)">Confirmé</button>
+    <button class="demo-btn" onclick="setStatus(1)">Prêt</button>
+    <button class="demo-btn active" onclick="setStatus(2)">En route</button>
+    <button class="demo-btn" onclick="setStatus(3)">Livré ✓</button>
+  </div>
+</div>
+
+<script>
+const steps = [
+  {
+    label: 'Confirmé',
+    icon: '✓',
+    title: ['Commande confirmée', 'Colis prêt', 'En route', 'Livré'],
+    time: ['Aujourd\'hui à 09h14', '', '', ''],
+    desc: ['', '', '', ''],
+    badge: { text: 'Commande confirmée', cls: 'in-progress' }
+  }
+];
+
+const statusConfig = [
+  {
+    badge: { text: 'Commande reçue', cls: '' },
+    doneTo: -1, activeSep: -1
+  },
+  {
+    badge: { text: 'Colis en préparation', cls: 'in-progress' },
+    doneTo: 0, activeSep: 0
+  },
+  {
+    badge: { text: 'En route vers vous', cls: 'in-progress' },
+    doneTo: 1, activeSep: 1
+  },
+  {
+    badge: { text: 'Livraison effectuée ✓', cls: '' },
+    doneTo: 3, activeSep: -1
+  }
+];
+
+const circleIcons = ['📦', '📦', '🛵', '🏁'];
+const circleDoneIcon = '✓';
+
+function setStatus(idx) {
+  // Update demo buttons
+  document.querySelectorAll('.demo-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === idx);
+  });
+
+  const cfg = statusConfig[idx];
+
+  // Badge
+  const badge = document.getElementById('statusBadge');
+  const statusText = document.getElementById('statusText');
+  badge.className = 'status-badge ' + cfg.cls;
+  statusText.textContent = cfg.badge.text;
+
+  // Steps
+  for (let i = 0; i < 4; i++) {
+    const circle = document.getElementById('circle' + i);
+    const title = document.getElementById('title' + i);
+    const line = document.getElementById('line' + i);
+
+    if (i <= cfg.doneTo) {
+      // Done
+      circle.className = 'step-circle done';
+      circle.textContent = '✓';
+      title.className = 'step-title done';
+      if (line) line.className = 'step-line done';
+    } else if (i === cfg.doneTo + 1 && cfg.activeSep >= 0) {
+      // Active
+      circle.className = 'step-circle active';
+      circle.textContent = circleIcons[i];
+      title.className = 'step-title active';
+      if (line) line.className = 'step-line active';
+    } else {
+      // Pending
+      circle.className = 'step-circle pending';
+      circle.textContent = circleIcons[i];
+      title.className = 'step-title pending';
+      if (line) line.className = 'step-line';
+    }
+  }
+
+  // Special: livré
+  if (idx === 3) {
+    const circle3 = document.getElementById('circle3');
+    circle3.className = 'step-circle done';
+    circle3.textContent = '✓';
+    document.getElementById('title3').className = 'step-title done';
+    document.getElementById('desc3').textContent = 'Colis remis à Aminata Diallo';
+    document.getElementById('time3').textContent = 'Aujourd\'hui à 13h47';
+  } else {
+    document.getElementById('desc3').textContent = 'En attente de confirmation';
+    document.getElementById('time3').textContent = '—';
+  }
+}
+</script>
+</body>
+</html>

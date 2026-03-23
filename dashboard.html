@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flivo — Dashboard</title>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f0f12; --card:#18181f; --border:#2a2a36;
+    --orange:#ff6b2b; --orange-soft:rgba(255,107,43,0.12);
+    --green:#22c55e; --green-soft:rgba(34,197,94,0.1);
+    --red:#ef4444; --red-soft:rgba(239,68,68,0.1);
+    --blue:#3b82f6; --yellow:#f59e0b;
+    --text:#f0ede8; --muted:#7a7890; --radius:18px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; padding:0 0 80px;
+  }
+
+  /* Topbar */
+  .topbar { width:100%; display:flex; align-items:center; justify-content:space-between; padding:20px 20px 0; }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:var(--orange); }
+  .logout-btn {
+    font-size:0.72rem; color:var(--muted); background:var(--card);
+    border:1px solid var(--border); padding:6px 12px; border-radius:30px;
+    cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif;
+  }
+  .logout-btn:hover { color:var(--red); border-color:var(--red); }
+
+  /* Header vendeur */
+  .header {
+    width:calc(100% - 32px); max-width:480px; margin:20px auto 0;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .header-left {}
+  .bonjour { font-size:0.78rem; color:var(--muted); margin-bottom:3px; }
+  .boutique-name { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; }
+
+  .plan-badge {
+    font-size:0.7rem; font-weight:600;
+    padding:5px 11px; border-radius:30px;
+    background:var(--orange-soft); color:var(--orange);
+    border:1px solid rgba(255,107,43,0.25);
+  }
+  .plan-badge.pro { background:var(--green-soft); color:var(--green); border-color:rgba(34,197,94,0.25); }
+
+  /* Stats */
+  .stats {
+    width:calc(100% - 32px); max-width:480px; margin:16px auto 0;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  }
+  .stat-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:14px 12px;
+  }
+  .stat-val { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; margin-bottom:2px; }
+  .stat-val.orange { color:var(--orange); }
+  .stat-val.green  { color:var(--green); }
+  .stat-val.blue   { color:var(--blue); }
+  .stat-label { font-size:0.68rem; color:var(--muted); line-height:1.3; }
+
+  /* Quota bar */
+  .quota-bar-wrap {
+    width:calc(100% - 32px); max-width:480px; margin:10px auto 0;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:12px 16px;
+  }
+  .quota-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .quota-label { font-size:0.72rem; color:var(--muted); }
+  .quota-count { font-size:0.72rem; font-weight:600; color:var(--orange); }
+  .quota-bar { height:5px; background:var(--border); border-radius:10px; overflow:hidden; }
+  .quota-fill { height:100%; background:var(--orange); border-radius:10px; transition:width 0.5s ease; }
+  .quota-fill.danger { background:var(--red); }
+
+  /* Bouton nouvelle livraison */
+  .new-btn {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:calc(100% - 32px); max-width:480px; margin:16px auto 0;
+    padding:16px; background:var(--orange); border-radius:14px;
+    color:#fff; font-family:'Syne',sans-serif; font-weight:700;
+    font-size:0.95rem; text-decoration:none; border:none; cursor:pointer;
+    transition:opacity 0.2s, transform 0.15s;
+  }
+  .new-btn:hover { opacity:0.9; transform:translateY(-1px); }
+
+  /* Filtres */
+  .filters {
+    width:calc(100% - 32px); max-width:480px; margin:20px auto 0;
+    display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;
+    scrollbar-width:none;
+  }
+  .filters::-webkit-scrollbar { display:none; }
+  .filter-btn {
+    flex-shrink:0; padding:7px 14px; border-radius:30px;
+    border:1px solid var(--border); background:transparent;
+    color:var(--muted); font-size:0.75rem; font-family:'DM Sans',sans-serif;
+    cursor:pointer; transition:all 0.2s; white-space:nowrap;
+  }
+  .filter-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; font-weight:600; }
+
+  /* Section label */
+  .section-label {
+    width:calc(100% - 32px); max-width:480px; margin:16px auto 6px;
+    font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted);
+  }
+
+  /* Liste livraisons */
+  .liste { width:calc(100% - 32px); max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:10px; }
+
+  .liv-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:16px; display:flex;
+    align-items:flex-start; gap:12px; cursor:pointer;
+    transition:border-color 0.2s, transform 0.15s;
+  }
+  .liv-card:hover { border-color:rgba(255,107,43,0.3); transform:translateY(-1px); }
+
+  .liv-statut-dot {
+    width:10px; height:10px; border-radius:50%;
+    flex-shrink:0; margin-top:5px;
+  }
+  .dot-0 { background:var(--muted); }
+  .dot-1 { background:var(--yellow); }
+  .dot-2 { background:var(--orange); animation:pulse 1.5s infinite; }
+  .dot-3 { background:var(--green); }
+  .dot-4 { background:var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .liv-body { flex:1; }
+  .liv-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
+  .liv-nom { font-family:'Syne',sans-serif; font-size:0.92rem; font-weight:700; }
+  .liv-code { font-size:0.68rem; color:var(--muted); font-family:monospace; }
+  .liv-adresse { font-size:0.78rem; color:var(--muted); margin-bottom:6px; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px; }
+  .liv-footer { display:flex; align-items:center; justify-content:space-between; }
+  .liv-montant { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; color:var(--orange); }
+  .liv-statut-label {
+    font-size:0.68rem; font-weight:600; padding:3px 9px; border-radius:20px;
+  }
+  .sl-0 { background:rgba(122,120,144,0.15); color:var(--muted); }
+  .sl-1 { background:rgba(245,158,11,0.1); color:var(--yellow); }
+  .sl-2 { background:var(--orange-soft); color:var(--orange); }
+  .sl-3 { background:var(--green-soft); color:var(--green); }
+  .sl-4 { background:var(--red-soft); color:var(--red); }
+
+  /* Boutons liens rapides */
+  .liv-actions { display:flex; flex-direction:column; gap:6px; flex-shrink:0; }
+  .quick-btn {
+    width:34px; height:34px; border-radius:8px; border:1px solid var(--border);
+    background:rgba(255,255,255,0.04); font-size:0.9rem;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.2s; text-decoration:none;
+  }
+  .quick-btn:hover { border-color:var(--orange); background:var(--orange-soft); }
+
+  /* Empty state */
+  .empty {
+    text-align:center; padding:40px 20px; color:var(--muted);
+  }
+  .empty-icon { font-size:2.5rem; margin-bottom:12px; }
+  .empty-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .empty-sub { font-size:0.8rem; }
+
+  /* Loading */
+  .loading { display:flex; align-items:center; justify-content:center; padding:48px; }
+  .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--card); border-top:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-around;
+    padding:12px 0 18px; z-index:10;
+  }
+  .nav-btn {
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    font-size:0.65rem; color:var(--muted); text-decoration:none;
+    cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif;
+  }
+  .nav-btn.active { color:var(--orange); }
+  .nav-icon { font-size:1.2rem; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo" id="appName">Flivo</div>
+  <button class="logout-btn" onclick="logout()">Déconnexion</button>
+</div>
+
+<div id="app">
+  <div class="loading"><div class="spinner"></div></div>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-btn active">
+    <div class="nav-icon">📦</div>
+    Livraisons
+  </div>
+  <a class="nav-btn" href="nouvelle-livraison.html">
+    <div class="nav-icon">➕</div>
+    Nouveau
+  </a>
+  <div class="nav-btn" onclick="alert('Statistiques — bientôt disponible')">
+    <div class="nav-icon">📊</div>
+    Stats
+  </div>
+</div>
+
+<script>
+const sb = window.supabase.createClient(FLIVO_CONFIG.supabase_url, FLIVO_CONFIG.supabase_anon_key)
+document.getElementById('appName').textContent = FLIVO_CONFIG.app_name
+
+const STATUT_LABELS = ['En attente','Prêt','En route','Livré ✓','Échec']
+let token = null
+let vendeur = null
+let toutes = []
+let filtreActif = 'tous'
+
+async function init() {
+  const { data } = await sb.auth.getSession()
+  if (!data.session) { window.location.href = 'login.html'; return }
+  token = data.session.access_token
+
+  // Charger vendeur
+  const { data: v } = await sb
+    .from('vendeurs')
+    .select('*')
+    .eq('id', data.session.user.id)
+    .single()
+  vendeur = v
+
+  await chargerLivraisons()
+}
+
+async function chargerLivraisons() {
+  const res = await fetch('/api/get-livraisons', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  const data = await res.json()
+  toutes = data.livraisons || []
+  renderDashboard()
+}
+
+function filtrer(statut) {
+  filtreActif = statut
+  renderDashboard()
+}
+
+function renderDashboard() {
+  const livFiltered = filtreActif === 'tous'
+    ? toutes
+    : toutes.filter(l => String(l.statut) === String(filtreActif))
+
+  // Stats
+  const total    = toutes.length
+  const enRoute  = toutes.filter(l => l.statut === 2).length
+  const livrees  = toutes.filter(l => l.statut === 3).length
+  const quota    = vendeur?.livraisons_ce_mois || 0
+  const isPro    = vendeur?.plan === 'pro' || vendeur?.plan === 'business'
+  const maxQuota = isPro ? '∞' : 20
+  const pct      = isPro ? 0 : Math.min((quota / 20) * 100, 100)
+
+  document.getElementById('app').innerHTML = `
+    <!-- Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="bonjour">Bonjour 👋</div>
+        <div class="boutique-name">${vendeur?.nom_boutique || 'Ma boutique'}</div>
+      </div>
+      <div class="plan-badge ${isPro ? 'pro' : ''}">${isPro ? '⭐ Pro' : 'Free'}</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-val orange">${total}</div>
+        <div class="stat-label">Total livraisons</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val blue">${enRoute}</div>
+        <div class="stat-label">En route</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val green">${livrees}</div>
+        <div class="stat-label">Livrées</div>
+      </div>
+    </div>
+
+    <!-- Quota -->
+    ${!isPro ? `
+    <div class="quota-bar-wrap">
+      <div class="quota-header">
+        <div class="quota-label">Quota mensuel (plan gratuit)</div>
+        <div class="quota-count">${quota} / ${maxQuota}</div>
+      </div>
+      <div class="quota-bar">
+        <div class="quota-fill ${pct >= 80 ? 'danger' : ''}" style="width:${pct}%"></div>
+      </div>
+    </div>
+    ` : ''}
+
+    <!-- Bouton nouvelle livraison -->
+    <a class="new-btn" href="nouvelle-livraison.html">
+      ➕ Nouvelle livraison
+    </a>
+
+    <!-- Filtres -->
+    <div class="filters">
+      <button class="filter-btn ${filtreActif==='tous'?'active':''}" onclick="filtrer('tous')">Toutes (${toutes.length})</button>
+      <button class="filter-btn ${filtreActif==='2'?'active':''}" onclick="filtrer('2')">🛵 En route (${toutes.filter(l=>l.statut===2).length})</button>
+      <button class="filter-btn ${filtreActif==='3'?'active':''}" onclick="filtrer('3')">✅ Livrées (${toutes.filter(l=>l.statut===3).length})</button>
+      <button class="filter-btn ${filtreActif==='4'?'active':''}" onclick="filtrer('4')">❌ Échecs (${toutes.filter(l=>l.statut===4).length})</button>
+    </div>
+
+    <!-- Liste -->
+    <div class="section-label">${livFiltered.length} livraison${livFiltered.length !== 1 ? 's' : ''}</div>
+    <div class="liste" id="listeLivraisons">
+      ${livFiltered.length === 0 ? `
+        <div class="empty">
+          <div class="empty-icon">📭</div>
+          <div class="empty-title">Aucune livraison ici</div>
+          <div class="empty-sub">Crée ta première livraison en appuyant sur ➕</div>
+        </div>
+      ` : livFiltered.map(l => renderCard(l)).join('')}
+    </div>
+  `
+}
+
+function renderCard(l) {
+  const appUrl = FLIVO_CONFIG.app_url
+  const lienClient  = `${appUrl}/track.html?code=${l.code}`
+  const lienLivreur = `${appUrl}/livreur.html?code=${l.code}`
+  const msgClient   = encodeURIComponent(`Bonjour ${l.client_nom} 👋\nSuivez votre livraison ici 👇\n${lienClient}`)
+  const msgLivreur  = encodeURIComponent(`Bonjour ${l.livreur_nom} 👋\nLivraison #${l.code} — ${l.client_nom}\n${l.adresse}\nGère ici 👇\n${lienLivreur}`)
+
+  return `
+    <div class="liv-card">
+      <div class="liv-statut-dot dot-${l.statut}"></div>
+      <div class="liv-body">
+        <div class="liv-header">
+          <div class="liv-nom">${l.client_nom}</div>
+          <div class="liv-code">#${l.code}</div>
+        </div>
+        <div class="liv-adresse">${l.adresse}</div>
+        <div class="liv-footer">
+          <div class="liv-montant">${Number(l.montant).toLocaleString('fr-FR')} FCFA</div>
+          <div class="liv-statut-label sl-${l.statut}">${STATUT_LABELS[l.statut]}</div>
+        </div>
+      </div>
+      <div class="liv-actions">
+        <a class="quick-btn" href="https://wa.me/${l.client_phone}?text=${msgClient}" target="_blank" title="WhatsApp client">👤</a>
+        <a class="quick-btn" href="https://wa.me/${l.livreur_phone}?text=${msgLivreur}" target="_blank" title="WhatsApp livreur">🛵</a>
+      </div>
+    </div>`
+}
+
+async function logout() {
+  await sb.auth.signOut()
+  window.location.href = 'login.html'
+}
+
+init()
+</script>
+</body>
+</html>
