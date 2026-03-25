@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flivo — Suivi de livraisons pour vendeurs africains</title>
+<meta name="description" content="Fini les appels pour savoir où est le colis. Flivo envoie un lien de suivi à ton client automatiquement. Gratuit pour commencer.">
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #f5f0e8;
+  --dark: #0f0e0c;
+  --orange: #ff5c1a;
+  --orange-light: #fff0ea;
+  --green: #1a7a4a;
+  --green-light: #e8f5ee;
+  --card: #fff;
+  --border: #e2ddd4;
+  --muted: #8a8478;
+  --text: #1a1814;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ── NAV ─────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px;
+  background: rgba(245,240,232,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 900; font-size: 1.3rem;
+  color: var(--orange); letter-spacing: -0.03em;
+}
+.nav-cta {
+  background: var(--dark); color: #fff;
+  padding: 10px 18px; border-radius: 30px;
+  font-size: 0.8rem; font-weight: 600;
+  text-decoration: none; transition: all 0.2s;
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+.nav-cta:hover { background: var(--orange); }
+
+/* ── HERO ────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 100px 22px 60px;
+  position: relative; overflow: hidden;
+  text-align: center;
+}
+
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,92,26,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(26,122,74,0.08) 0%, transparent 60%);
+}
+.hero-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,92,26,0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+  opacity: 0.5;
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 420px; }
+
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--green-light); color: var(--green);
+  border: 1px solid rgba(26,122,74,0.2);
+  padding: 6px 14px; border-radius: 30px;
+  font-size: 0.72rem; font-weight: 600;
+  margin-bottom: 22px;
+  animation: fadeUp 0.6s ease both;
+}
+.tag-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero-title {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 900; font-size: 2.6rem;
+  line-height: 1.08; letter-spacing: -0.03em;
+  margin-bottom: 18px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.hero-title .accent { color: var(--orange); }
+.hero-title .underline { position: relative; display: inline-block; }
+.hero-title .underline::after {
+  content: '';
+  position: absolute; left: 0; bottom: 2px; right: 0;
+  height: 4px; background: var(--orange); border-radius: 2px; opacity: 0.4;
+}
+
+.hero-sub {
+  font-size: 1rem; color: var(--muted); line-height: 1.65;
+  margin-bottom: 30px;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+
+.hero-btns {
+  display: flex; flex-direction: column; gap: 10px;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--orange); color: #fff;
+  padding: 17px 28px; border-radius: 14px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 700; font-size: 1rem;
+  text-decoration: none; transition: all 0.2s;
+  box-shadow: 0 8px 24px rgba(255,92,26,0.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(255,92,26,0.4); }
+.btn-secondary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent; color: var(--text);
+  padding: 15px 28px; border-radius: 14px;
+  font-size: 0.88rem; font-weight: 500;
+  text-decoration: none; border: 1.5px solid var(--border);
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--dark); }
+
+.hero-note {
+  margin-top: 18px; font-size: 0.72rem; color: var(--muted);
+  animation: fadeUp 0.6s 0.4s ease both;
+}
+.hero-note span { color: var(--green); font-weight: 600; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── PROBLÈME ────────────────────────────── */
+.section { padding: 64px 22px; }
+.section-inner { max-width: 480px; margin: 0 auto; }
+.section-tag {
+  display: inline-block;
+  font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--orange); margin-bottom: 12px;
+}
+.section-title {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 800; font-size: 1.7rem;
+  line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 20px;
+}
+
+.problem-scenes { display: flex; flex-direction: column; gap: 12px; }
+.scene {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 18px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.scene-icon { font-size: 1.6rem; flex-shrink: 0; }
+.scene-title { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 0.92rem; margin-bottom: 4px; }
+.scene-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+
+/* ── SOLUTION ────────────────────────────── */
+.solution-section {
+  background: var(--dark); color: #f0ede8;
+  padding: 64px 22px; position: relative; overflow: hidden;
+}
+.solution-section::before {
+  content: '';
+  position: absolute; top: -80px; right: -80px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(255,92,26,0.2) 0%, transparent 70%);
+}
+.solution-inner { max-width: 480px; margin: 0 auto; position: relative; z-index: 1; }
+.solution-tag { color: var(--orange); }
+.solution-title { color: #f0ede8; }
+
+.steps { display: flex; flex-direction: column; gap: 0; margin-top: 24px; }
+.step-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding-bottom: 28px; position: relative;
+}
+.step-item:last-child { padding-bottom: 0; }
+.step-item::before {
+  content: '';
+  position: absolute; left: 18px; top: 42px; bottom: 0;
+  width: 1px; background: rgba(255,255,255,0.1);
+}
+.step-item:last-child::before { display: none; }
+.step-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--orange); color: #fff;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-weight: 800; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; z-index: 1;
+}
+.step-title { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; color: #f0ede8; }
+.step-desc { font-size: 0.78rem; color: rgba(240,237,232,0.55); line-height: 1.55; }
+
+/* ── PHONE MOCKUP ────────────────────────── */
+.preview-section { padding: 64px 22px; }
+.preview-inner { max-width: 480px; margin: 0 auto; }
+.phone-mockup {
+  background: var(--dark); border-radius: 28px; padding: 3px;
+  margin: 24px auto 0; max-width: 260px;
+  box-shadow: 0 24px 60px rgba(15,14,12,0.25);
+}
+.phone-screen { background: #0f0f12; border-radius: 26px; padding: 20px 16px; overflow: hidden; }
+.mock-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.mock-logo { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900; font-size: 0.85rem; color: #ff6b2b; }
+.mock-code { font-family: monospace; font-size: 0.6rem; color: #7a7890; background: #18181f; padding: 3px 7px; border-radius: 20px; }
+.mock-card { background: #18181f; border: 1px solid #2a2a36; border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.mock-boutique { font-size: 0.55rem; color: #7a7890; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+.mock-client { font-family: 'Cabinet Grotesk', sans-serif; font-size: 0.9rem; font-weight: 800; color: #f0ede8; margin-bottom: 10px; }
+.mock-client span { color: #ff6b2b; }
+.mock-addr { background: rgba(255,255,255,0.03); border: 1px solid #2a2a36; border-radius: 7px; padding: 8px; display: flex; gap: 6px; }
+.mock-addr-text { font-size: 0.58rem; color: #c9c6d4; line-height: 1.4; }
+.mock-badge { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; background: rgba(255,107,43,0.12); border: 1px solid rgba(255,107,43,0.25); color: #ff6b2b; font-size: 0.6rem; font-weight: 600; padding: 4px 9px; border-radius: 20px; }
+.mock-dot { width: 5px; height: 5px; border-radius: 50%; background: #ff6b2b; animation: pulse 1.5s infinite; }
+.mock-steps { display: flex; flex-direction: column; }
+.mock-step { display: flex; gap: 8px; align-items: flex-start; }
+.mock-step-left { display: flex; flex-direction: column; align-items: center; width: 20px; }
+.mock-step-circle { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; border: 1.5px solid #2a2a36; background: #18181f; }
+.mock-step-circle.done { background: #22c55e; border-color: #22c55e; }
+.mock-step-circle.active { background: #ff6b2b; border-color: #ff6b2b; }
+.mock-step-circle.pending { opacity: 0.4; }
+.mock-step-line { width: 1px; height: 16px; background: #2a2a36; }
+.mock-step-line.done { background: #22c55e; }
+.mock-step-content { padding-top: 2px; padding-bottom: 14px; }
+.mock-step-title { font-size: 0.6rem; font-weight: 600; color: #f0ede8; }
+.mock-step-title.done { color: #22c55e; }
+.mock-step-title.active { color: #ff6b2b; }
+.mock-step-title.pending { color: #7a7890; }
+.mock-step-desc { font-size: 0.52rem; color: #7a7890; margin-top: 1px; }
+
+/* ── PRICING ─────────────────────────────── */
+.pricing-section { padding: 64px 22px; background: var(--card); }
+.pricing-inner { max-width: 480px; margin: 0 auto; }
+.pricing-cards { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
+.pricing-card { border: 2px solid var(--border); border-radius: 18px; padding: 22px; position: relative; background: var(--bg); }
+.pricing-card.featured { border-color: var(--orange); background: var(--card); }
+.featured-badge { position: absolute; top: -12px; left: 22px; background: var(--orange); color: #fff; font-size: 0.65rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; font-family: 'Cabinet Grotesk', sans-serif; }
+.pricing-name { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 800; font-size: 1rem; margin-bottom: 2px; }
+.pricing-price { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900; font-size: 1.8rem; color: var(--orange); letter-spacing: -0.03em; margin: 8px 0 4px; }
+.pricing-price span { font-size: 0.75rem; font-weight: 500; color: var(--muted); }
+.pricing-features { margin: 14px 0; display: flex; flex-direction: column; gap: 7px; }
+.pf { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+.pf-text { color: #444; }
+.pricing-btn { width: 100%; padding: 13px; border-radius: 11px; border: none; font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; text-decoration: none; display: block; text-align: center; transition: all 0.2s; }
+.pricing-btn.main { background: var(--orange); color: #fff; }
+.pricing-btn.main:hover { opacity: 0.9; }
+.pricing-btn.ghost { background: transparent; color: var(--text); border: 1.5px solid var(--border); }
+.pricing-btn.ghost:hover { border-color: var(--dark); }
+
+/* ── TESTIMONIALS ────────────────────────── */
+.testi-section { padding: 64px 22px; }
+.testi-inner { max-width: 480px; margin: 0 auto; }
+.testi-cards { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.testi-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 16px; padding: 20px; }
+.testi-stars { color: #f59e0b; font-size: 0.85rem; margin-bottom: 10px; }
+.testi-text { font-size: 0.82rem; color: var(--text); line-height: 1.6; margin-bottom: 14px; font-style: italic; }
+.testi-author { display: flex; align-items: center; gap: 10px; }
+.testi-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.testi-name { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 0.85rem; }
+.testi-role { font-size: 0.7rem; color: var(--muted); }
+
+/* ── CTA FINAL ───────────────────────────── */
+.cta-section { padding: 72px 22px; background: var(--dark); text-align: center; position: relative; overflow: hidden; }
+.cta-section::before { content: ''; position: absolute; bottom: -100px; left: 50%; transform: translateX(-50%); width: 400px; height: 300px; background: radial-gradient(circle, rgba(255,92,26,0.25) 0%, transparent 70%); }
+.cta-inner { max-width: 420px; margin: 0 auto; position: relative; z-index: 1; }
+.cta-title { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900; font-size: 2rem; color: #f0ede8; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 14px; }
+.cta-title span { color: var(--orange); }
+.cta-sub { font-size: 0.85rem; color: rgba(240,237,232,0.5); margin-bottom: 28px; line-height: 1.6; }
+.cta-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--orange); color: #fff; padding: 17px 32px; border-radius: 14px; font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 1rem; text-decoration: none; transition: all 0.2s; box-shadow: 0 8px 32px rgba(255,92,26,0.4); }
+.cta-btn:hover { transform: translateY(-2px); }
+.cta-note { margin-top: 14px; font-size: 0.7rem; color: rgba(240,237,232,0.3); }
+
+/* ── FOOTER ──────────────────────────────── */
+footer { background: var(--dark); border-top: 1px solid rgba(255,255,255,0.06); padding: 24px 22px; text-align: center; }
+.footer-logo { font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900; font-size: 1.1rem; color: var(--orange); margin-bottom: 8px; }
+.footer-links { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+.footer-links a { font-size: 0.72rem; color: rgba(240,237,232,0.4); text-decoration: none; }
+.footer-links a:hover { color: var(--orange); }
+.footer-copy { font-size: 0.68rem; color: rgba(240,237,232,0.2); }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Flivo</div>
+  <a class="nav-cta" href="login.html">Commencer gratuitement</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-tag">
+      <div class="tag-dot"></div>
+      Pour vendeurs Facebook, Instagram & WhatsApp
+    </div>
+    <h1 class="hero-title">
+      Fini les appels<br>
+      <span class="accent">"où est mon colis ?"</span>
+    </h1>
+    <p class="hero-sub">
+      Flivo envoie un lien de suivi à ton client dès que tu crées une livraison. Il suit son colis en temps réel. Toi tu bosses.
+    </p>
+    <div class="hero-btns">
+      <a class="btn-primary" href="login.html">🚀 Créer mon compte gratuit</a>
+      <a class="btn-secondary" href="#comment">Voir comment ça marche →</a>
+    </div>
+    <p class="hero-note"><span>✅ Gratuit</span> jusqu'à 20 livraisons/mois. Sans carte bancaire.</p>
+  </div>
+</section>
+
+<!-- PROBLÈME -->
+<section class="section" id="probleme">
+  <div class="section-inner reveal">
+    <div class="section-tag">Le problème</div>
+    <h2 class="section-title">Tu te reconnais dans ces situations ?</h2>
+    <div class="problem-scenes">
+      <div class="scene">
+        <div class="scene-icon">📞</div>
+        <div class="scene-content">
+          <div class="scene-title">10 appels par jour pour "où est ma commande ?"</div>
+          <div class="scene-desc">Chaque client rappelle dès que le livreur est en retard. Tu perds du temps à répondre au lieu de vendre.</div>
+        </div>
+      </div>
+      <div class="scene">
+        <div class="scene-icon">😰</div>
+        <div class="scene-content">
+          <div class="scene-title">Tu ne sais pas où est ton livreur</div>
+          <div class="scene-desc">Il est parti depuis 2h. A-t-il livré ? Est-il bloqué ? Tu n'as aucune visibilité sur tes livraisons en cours.</div>
+        </div>
+      </div>
+      <div class="scene">
+        <div class="scene-icon">💸</div>
+        <div class="scene-content">
+          <div class="scene-title">Des clients mécontents qui ne commandent plus</div>
+          <div class="scene-desc">Sans suivi, les clients doutent. Certains annulent leur commande. D'autres vont chez la concurrence.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section class="solution-section" id="comment">
+  <div class="solution-inner reveal">
+    <div class="section-tag solution-tag">La solution Flivo</div>
+    <h2 class="section-title solution-title">3 étapes, zéro stress</h2>
+    <div class="steps">
+      <div class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Tu crées la livraison en 30 secondes</div>
+          <div class="step-desc">Nom du client, adresse, montant, livreur. Flivo génère automatiquement deux liens — un pour le client, un pour le livreur.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Tu envoies les liens sur WhatsApp</div>
+          <div class="step-desc">Le client reçoit sa page de suivi. Le livreur reçoit son lien avec des boutons pour mettre à jour le statut en 1 clic.</div>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Tout le monde est informé automatiquement</div>
+          <div class="step-desc">Dès que le livreur clique "En route" ou "Livré", la page du client se met à jour instantanément. Zéro appel. Zéro stress.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHONE MOCKUP -->
+<section class="preview-section">
+  <div class="preview-inner reveal">
+    <div class="section-tag">Ce que voit ton client</div>
+    <h2 class="section-title">Une page de suivi propre sur son téléphone</h2>
+    <div class="phone-mockup">
+      <div class="phone-screen">
+        <div class="mock-topbar">
+          <div class="mock-logo">Flivo</div>
+          <div class="mock-code">#TRK-20483</div>
+        </div>
+        <div class="mock-card">
+          <div class="mock-boutique">Awa Fashion</div>
+          <div class="mock-client">Livraison pour <span>Aminata</span></div>
+          <div class="mock-addr">
+            <div class="mock-addr-text">📍 Cocody Riviera 3, carrefour Shell</div>
+          </div>
+          <div class="mock-badge"><div class="mock-dot"></div> En route vers vous</div>
+        </div>
+        <div class="mock-steps">
+          <div class="mock-step">
+            <div class="mock-step-left">
+              <div class="mock-step-circle done">✓</div>
+              <div class="mock-step-line done"></div>
+            </div>
+            <div class="mock-step-content">
+              <div class="mock-step-title done">Confirmée</div>
+              <div class="mock-step-desc">09h14</div>
+            </div>
+          </div>
+          <div class="mock-step">
+            <div class="mock-step-left">
+              <div class="mock-step-circle done">✓</div>
+              <div class="mock-step-line done"></div>
+            </div>
+            <div class="mock-step-content">
+              <div class="mock-step-title done">Colis prêt</div>
+              <div class="mock-step-desc">10h32</div>
+            </div>
+          </div>
+          <div class="mock-step">
+            <div class="mock-step-left">
+              <div class="mock-step-circle active">🛵</div>
+              <div class="mock-step-line"></div>
+            </div>
+            <div class="mock-step-content">
+              <div class="mock-step-title active">En route</div>
+              <div class="mock-step-desc">En cours...</div>
+            </div>
+          </div>
+          <div class="mock-step">
+            <div class="mock-step-left">
+              <div class="mock-step-circle pending">🏁</div>
+            </div>
+            <div class="mock-step-content">
+              <div class="mock-step-title pending">Livré</div>
+              <div class="mock-step-desc">En attente</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="tarifs">
+  <div class="pricing-inner reveal">
+    <div class="section-tag">Tarifs</div>
+    <h2 class="section-title">Simple. Accessible. Africain.</h2>
+    <div class="pricing-cards">
+      <div class="pricing-card">
+        <div class="pricing-name">Gratuit</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:4px;">Pour démarrer</div>
+        <div class="pricing-price">0 <span>FCFA / mois</span></div>
+        <div class="pricing-features">
+          <div class="pf">✅ <span class="pf-text">20 livraisons / mois</span></div>
+          <div class="pf">✅ <span class="pf-text">Page de suivi client</span></div>
+          <div class="pf">✅ <span class="pf-text">Lien livreur</span></div>
+          <div class="pf">✅ <span class="pf-text">Dashboard temps réel</span></div>
+          <div class="pf">❌ <span class="pf-text" style="color:var(--muted)">Support inclus</span></div>
+        </div>
+        <a class="pricing-btn ghost" href="login.html">Commencer gratuitement</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="featured-badge">⭐ LE PLUS POPULAIRE</div>
+        <div class="pricing-name">Pro</div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:4px;">Pour les vendeurs actifs</div>
+        <div class="pricing-price">3 500 <span>FCFA / mois</span></div>
+        <div class="pricing-features">
+          <div class="pf">✅ <span class="pf-text"><strong>Livraisons illimitées</strong></span></div>
+          <div class="pf">✅ <span class="pf-text">Page de suivi client</span></div>
+          <div class="pf">✅ <span class="pf-text">Lien livreur</span></div>
+          <div class="pf">✅ <span class="pf-text">Dashboard temps réel</span></div>
+          <div class="pf">✅ <span class="pf-text"><strong>Support WhatsApp 7j/7</strong></span></div>
+        </div>
+        <a class="pricing-btn main" href="login.html">Choisir Pro — 3 500 FCFA</a>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:16px;">
+      Paiement par Wave · Orange Money · MTN MoMo · Carte
+    </p>
+  </div>
+</section>
+
+<!-- TÉMOIGNAGES -->
+<section class="testi-section">
+  <div class="testi-inner reveal">
+    <div class="section-tag">Témoignages</div>
+    <h2 class="section-title">Ce que disent les vendeurs</h2>
+    <div class="testi-cards">
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Avant je passais ma journée au téléphone à répondre aux clientes. Depuis Flivo, elles suivent elles-mêmes leur commande. J'ai gagné au moins 2h par jour — du temps que je mets maintenant à vendre."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#ff5c1a,#ffad3c)">👩🏾</div>
+          <div>
+            <div class="testi-name">Fatoumata Coulibaly</div>
+            <div class="testi-role">Boutique mode & cosmétiques — Abidjan</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Mon livreur clique un bouton, le client voit direct que c'est en route. Plus personne ne me rappelle. Mes clients me disent que c'est professionnel. Ça me distingue des autres vendeurs."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#1a7a4a,#34c87a)">👨🏾</div>
+          <div>
+            <div class="testi-name">Ibrahima Sow</div>
+            <div class="testi-role">Vente électronique — Dakar</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"J'ai essayé d'autres outils mais c'était trop compliqué. Flivo c'est simple — tu remplis le formulaire, tu envoies le lien sur WhatsApp, c'est fait. Même mon livreur qui n'est pas technologique s'en sort parfaitement."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#7c3aed,#c084fc)">👩🏾</div>
+          <div>
+            <div class="testi-name">Aminata Traoré</div>
+            <div class="testi-role">Commerce alimentaire — Bamako</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <h2 class="cta-title">Prêt à arrêter de répondre à <span>"où est mon colis ?"</span></h2>
+    <p class="cta-sub">Rejoins les vendeurs qui gèrent leurs livraisons comme des pros. Gratuit pour commencer, sans carte bancaire.</p>
+    <a class="cta-btn" href="login.html">🚀 Créer mon compte gratuit</a>
+    <p class="cta-note">Aucune carte bancaire requise · Prêt en 2 minutes</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Flivo</div>
+  <div class="footer-links">
+    <a href="#">Mentions légales</a>
+    <a href="#">Confidentialité</a>
+    <a href="https://wa.me/2290196830775" target="_blank">💬 Support WhatsApp</a>
+    <a href="login.html">Connexion</a>
+  </div>
+  <p class="footer-copy">© 2025 Flivo · Fait pour l'Afrique 🌍</p>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
+}, { threshold: 0.12 })
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el))
+</script>
+</body>
+</html>
