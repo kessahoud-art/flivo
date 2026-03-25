@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flivo — Nouvelle livraison</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff6b2b">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f0f12; --card:#18181f; --border:#2a2a36;
+    --orange:#ff6b2b; --orange-soft:rgba(255,107,43,0.12);
+    --green:#22c55e; --green-soft:rgba(34,197,94,0.1);
+    --text:#f0ede8; --muted:#7a7890; --radius:16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; overflow-x:hidden; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding:0 0 48px; }
+
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:18px 16px 0; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:0.82rem; text-decoration:none; background:var(--card); border:1px solid var(--border); padding:7px 13px; border-radius:30px; }
+  .back-btn:hover { color:var(--orange); border-color:var(--orange); }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:var(--orange); }
+
+  .page-content { width:100%; max-width:480px; margin:0 auto; padding:0 16px; }
+  .page-title { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; margin-top:20px; }
+  .page-sub { font-size:0.78rem; color:var(--muted); margin-top:4px; margin-bottom:20px; }
+
+  .form-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; margin-bottom:12px; }
+  .section-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:12px; }
+  .divider { height:1px; background:var(--border); margin:16px 0; }
+  .field { margin-bottom:12px; }
+  .field:last-child { margin-bottom:0; }
+  .field label { display:block; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:5px; }
+  .field input, .field textarea {
+    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:10px; padding:11px 12px; color:var(--text);
+    font-family:'DM Sans',sans-serif; font-size:0.88rem; outline:none;
+    transition:border-color 0.2s; resize:none;
+  }
+  .field input:focus, .field textarea:focus { border-color:var(--orange); }
+  .field input::placeholder, .field textarea::placeholder { color:var(--muted); }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  /* Livreurs enregistrés */
+  .livreurs-scroll { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; margin-bottom:12px; }
+  .livreurs-scroll::-webkit-scrollbar { display:none; }
+  .livreur-chip {
+    flex-shrink:0; display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:30px; padding:7px 12px; cursor:pointer; transition:all 0.2s;
+    white-space:nowrap;
+  }
+  .livreur-chip:hover { border-color:var(--orange); }
+  .livreur-chip.selected { background:var(--orange-soft); border-color:var(--orange); color:var(--orange); }
+  .livreur-chip-name { font-size:0.78rem; font-weight:500; }
+  .no-livreurs { font-size:0.75rem; color:var(--muted); margin-bottom:10px; }
+  .no-livreurs a { color:var(--orange); text-decoration:none; }
+
+  .submit-btn {
+    width:100%; padding:16px; background:var(--orange); border:none;
+    border-radius:14px; color:#fff; font-family:'Syne',sans-serif;
+    font-weight:700; font-size:0.95rem; cursor:pointer;
+    transition:opacity 0.2s, transform 0.15s; margin-top:4px;
+  }
+  .submit-btn:hover { opacity:0.9; transform:translateY(-1px); }
+  .submit-btn:disabled { opacity:0.5; pointer-events:none; }
+
+  .msg { padding:10px 12px; border-radius:10px; font-size:0.78rem; margin-top:10px; display:none; }
+  .msg.error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#ef4444; display:block; }
+
+  /* Modale succès */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); display:flex; align-items:flex-end; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  .modal-overlay.show { opacity:1; pointer-events:all; }
+  .modal { width:100%; max-width:480px; background:var(--card); border-radius:24px 24px 0 0; padding:24px 18px 40px; border-top:1px solid var(--border); transform:translateY(100%); transition:transform 0.35s cubic-bezier(0.34,1.2,0.64,1); }
+  .modal-overlay.show .modal { transform:translateY(0); }
+  .modal-title { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; margin-bottom:4px; }
+  .modal-sub { font-size:0.78rem; color:var(--muted); margin-bottom:18px; }
+  .modal-code { font-family:monospace; font-size:1rem; font-weight:700; color:var(--orange); background:var(--orange-soft); border:1px solid rgba(255,107,43,0.2); border-radius:10px; padding:10px 14px; margin-bottom:16px; text-align:center; }
+  .lien-bloc { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; }
+  .lien-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:5px; }
+  .lien-url { font-size:0.72rem; color:var(--text); word-break:break-all; margin-bottom:8px; line-height:1.4; }
+  .lien-btns { display:flex; gap:8px; }
+  .lien-btn { flex:1; padding:9px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); font-size:0.72rem; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; text-align:center; text-decoration:none; display:block; }
+  .lien-btn:hover { border-color:var(--orange); color:var(--orange); }
+  .lien-btn.wa { background:#25D366; border-color:#25D366; color:#fff; }
+  .modal-done { width:100%; margin-top:6px; padding:13px; background:transparent; border:1px solid var(--border); border-radius:12px; color:var(--text); font-family:'Syne',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer; }
+  .modal-done:hover { border-color:var(--orange); color:var(--orange); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="dashboard.html">← Retour</a>
+  <div class="logo" id="appName">Flivo</div>
+</div>
+
+<div class="page-content">
+  <div class="page-title">Nouvelle livraison</div>
+  <div class="page-sub">Remplis les infos — les liens sont générés automatiquement</div>
+
+  <div class="form-card">
+    <div class="section-label">📦 Client</div>
+    <div class="field">
+      <label>Nom du client</label>
+      <input type="text" id="clientNom" placeholder="Aminata Diallo">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Téléphone</label>
+        <input type="tel" id="clientPhone" placeholder="2250708000000">
+      </div>
+      <div class="field">
+        <label>Montant (FCFA)</label>
+        <input type="number" id="montant" placeholder="12500">
+      </div>
+    </div>
+    <div class="field">
+      <label>Adresse</label>
+      <textarea id="adresse" rows="2" placeholder="Cocody Riviera 3, carrefour Shell..."></textarea>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">🛵 Livreur</div>
+
+    <!-- Livreurs enregistrés -->
+    <div id="livreursChips"></div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Nom du livreur</label>
+        <input type="text" id="livreurNom" placeholder="Moussa Koné">
+      </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input type="tel" id="livreurPhone" placeholder="2250708000000">
+      </div>
+    </div>
+
+    <div class="msg" id="formMsg"></div>
+  </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="creerLivraison()">
+    🚀 Créer la livraison
+  </button>
+</div>
+
+<!-- Modale succès -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">✅ Livraison créée !</div>
+    <div class="modal-sub">Envoie les liens sur WhatsApp</div>
+    <div class="modal-code" id="modalCode"></div>
+    <div class="lien-bloc">
+      <div class="lien-label">🔗 Lien client</div>
+      <div class="lien-url" id="lienClient"></div>
+      <div class="lien-btns">
+        <button class="lien-btn" onclick="copier('client')">📋 Copier</button>
+        <a class="lien-btn wa" id="waClient" href="#" target="_blank">💬 WhatsApp</a>
+      </div>
+    </div>
+    <div class="lien-bloc">
+      <div class="lien-label">🛵 Lien livreur</div>
+      <div class="lien-url" id="lienLivreur"></div>
+      <div class="lien-btns">
+        <button class="lien-btn" onclick="copier('livreur')">📋 Copier</button>
+        <a class="lien-btn wa" id="waLivreur" href="#" target="_blank">💬 WhatsApp</a>
+      </div>
+    </div>
+    <button class="modal-done" onclick="fermerModal()">Voir mes livraisons →</button>
+  </div>
+</div>
+
+<script>
+const sb = window.supabase.createClient(FLIVO_CONFIG.supabase_url, FLIVO_CONFIG.supabase_anon_key)
+document.getElementById('appName').textContent = FLIVO_CONFIG.app_name
+
+let token = null
+let liensData = {}
+let clientNomCache = ''
+let livreurNomCache = ''
+let livreurPhoneCache = ''
+
+async function init() {
+  const { data } = await sb.auth.getSession()
+  if (!data.session) { window.location.href = 'login.html'; return }
+  token = data.session.access_token
+  chargerLivreurs()
+}
+
+async function chargerLivreurs() {
+  const res  = await fetch('/api/get-livreurs', { headers: { 'Authorization': 'Bearer ' + token } })
+  const data = await res.json()
+  const livreurs = data.livreurs || []
+  const el = document.getElementById('livreursChips')
+
+  if (livreurs.length === 0) {
+    el.innerHTML = `<p class="no-livreurs">Aucun livreur enregistré — <a href="livreurs.html">en ajouter ?</a></p>`
+    return
+  }
+
+  el.innerHTML = `
+    <div style="font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;">Livreurs enregistrés</div>
+    <div class="livreurs-scroll">
+      ${livreurs.map(l => `
+        <div class="livreur-chip" onclick="selectionnerLivreur('${l.nom}','${l.phone}',this)">
+          <span>🛵</span>
+          <span class="livreur-chip-name">${l.nom}</span>
+        </div>
+      `).join('')}
+    </div>
+  `
+}
+
+function selectionnerLivreur(nom, phone, el) {
+  document.querySelectorAll('.livreur-chip').forEach(c => c.classList.remove('selected'))
+  el.classList.add('selected')
+  document.getElementById('livreurNom').value = nom
+  document.getElementById('livreurPhone').value = phone
+}
+
+function showMsg(msg) {
+  const el = document.getElementById('formMsg')
+  el.textContent = msg
+  el.className = 'msg error'
+}
+
+async function creerLivraison() {
+  const clientNom    = document.getElementById('clientNom').value.trim()
+  const clientPhone  = document.getElementById('clientPhone').value.trim()
+  const montant      = document.getElementById('montant').value.trim()
+  const adresse      = document.getElementById('adresse').value.trim()
+  const livreurNom   = document.getElementById('livreurNom').value.trim()
+  const livreurPhone = document.getElementById('livreurPhone').value.trim()
+
+  if (!clientNom || !clientPhone || !montant || !adresse || !livreurNom || !livreurPhone) {
+    return showMsg('Remplis tous les champs avant de continuer')
+  }
+
+  clientNomCache   = clientNom
+  livreurNomCache  = livreurNom
+  livreurPhoneCache = livreurPhone
+
+  const btn = document.getElementById('submitBtn')
+  btn.disabled = true
+  btn.textContent = 'Création en cours...'
+
+  try {
+    const res  = await fetch('/api/create-livraison', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ client_nom:clientNom, client_phone:clientPhone, montant, adresse, livreur_nom:livreurNom, livreur_phone:livreurPhone })
+    })
+    const data = await res.json()
+
+    if (!res.ok) {
+      showMsg(data.error === 'quota_atteint'
+        ? '🚫 ' + data.message
+        : 'Erreur : ' + (data.error || 'réessaie'))
+      btn.disabled = false
+      btn.textContent = '🚀 Créer la livraison'
+      return
+    }
+
+    liensData = data.liens
+    document.getElementById('modalCode').textContent = '#' + data.livraison.code
+    document.getElementById('lienClient').textContent  = data.liens.client
+    document.getElementById('lienLivreur').textContent = data.liens.livreur
+
+    const msgC = encodeURIComponent(`Bonjour ${clientNom} 👋\nVotre commande est confirmée.\nSuivez votre livraison ici 👇\n${data.liens.client}\nLivreur : ${livreurNom} — ${livreurPhone}`)
+    const msgL = encodeURIComponent(`Bonjour ${livreurNom} 👋\nNouvelle livraison #${data.livraison.code}\nClient : ${clientNom}\n${adresse}\nMontant : ${Number(montant).toLocaleString('fr-FR')} FCFA\nGère ici 👇\n${data.liens.livreur}`)
+
+    document.getElementById('waClient').href  = `https://wa.me/${clientPhone}?text=${msgC}`
+    document.getElementById('waLivreur').href = `https://wa.me/${livreurPhone}?text=${msgL}`
+    document.getElementById('modalOverlay').classList.add('show')
+
+  } catch(e) {
+    showMsg('Erreur réseau — réessaie')
+    btn.disabled = false
+    btn.textContent = '🚀 Créer la livraison'
+  }
+}
+
+function copier(type) {
+  const lien = type === 'client' ? liensData.client : liensData.livreur
+  navigator.clipboard.writeText(lien).then(() => alert('Lien copié !')).catch(() => prompt('Copie ce lien :', lien))
+}
+
+function fermerModal() {
+  document.getElementById('modalOverlay').classList.remove('show')
+  window.location.href = 'dashboard.html'
+}
+
+init()
+</script>
+</body>
+</html>

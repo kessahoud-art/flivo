@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flivo — Mes livreurs</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff6b2b">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f0f12; --card:#18181f; --border:#2a2a36;
+    --orange:#ff6b2b; --orange-soft:rgba(255,107,43,0.12);
+    --green:#22c55e; --green-soft:rgba(34,197,94,0.1);
+    --red:#ef4444; --red-soft:rgba(239,68,68,0.1);
+    --text:#f0ede8; --muted:#7a7890; --radius:16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; overflow-x:hidden; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding:0 0 90px; }
+
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:18px 16px 0; }
+  .back-btn { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:0.82rem; text-decoration:none; background:var(--card); border:1px solid var(--border); padding:7px 13px; border-radius:30px; }
+  .back-btn:hover { color:var(--orange); border-color:var(--orange); }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:var(--orange); }
+
+  .page-content { width:100%; max-width:480px; margin:0 auto; padding:0 16px; }
+
+  .page-title { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; margin-top:20px; }
+  .page-sub { font-size:0.78rem; color:var(--muted); margin-top:4px; margin-bottom:20px; }
+
+  /* Formulaire ajout */
+  .add-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px; margin-bottom:20px; }
+  .add-title { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; margin-bottom:14px; }
+  .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .field label { display:block; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:5px; }
+  .field input { width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:10px; padding:11px 12px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.88rem; outline:none; transition:border-color 0.2s; }
+  .field input:focus { border-color:var(--orange); }
+  .field input::placeholder { color:var(--muted); }
+  .add-btn { width:100%; padding:12px; background:var(--orange); border:none; border-radius:10px; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.88rem; cursor:pointer; transition:opacity 0.2s; }
+  .add-btn:hover { opacity:0.9; }
+  .add-btn:disabled { opacity:0.5; pointer-events:none; }
+  .msg { padding:9px 12px; border-radius:8px; font-size:0.78rem; margin-top:10px; display:none; }
+  .msg.error { background:var(--red-soft); color:var(--red); border:1px solid rgba(239,68,68,0.2); display:block; }
+  .msg.success { background:var(--green-soft); color:var(--green); border:1px solid rgba(34,197,94,0.2); display:block; }
+
+  /* Section label */
+  .section-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:10px; }
+
+  /* Liste livreurs */
+  .livreurs-liste { display:flex; flex-direction:column; gap:8px; }
+  .livreur-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px; display:flex; align-items:center; gap:12px; }
+  .livreur-avatar { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#ff6b2b,#ff9a3c); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+  .livreur-info { flex:1; min-width:0; }
+  .livreur-nom { font-family:'Syne',sans-serif; font-size:0.92rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .livreur-phone { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+  .livreur-count { font-size:0.68rem; color:var(--orange); background:var(--orange-soft); padding:2px 8px; border-radius:20px; margin-top:3px; display:inline-block; }
+  .livreur-actions { display:flex; gap:6px; flex-shrink:0; }
+  .action-btn { width:34px; height:34px; border-radius:8px; border:1px solid var(--border); background:transparent; font-size:0.85rem; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:all 0.2s; }
+  .action-btn:hover { border-color:var(--orange); background:var(--orange-soft); }
+  .action-btn.del:hover { border-color:var(--red); background:var(--red-soft); }
+
+  .empty { text-align:center; padding:32px 20px; color:var(--muted); font-size:0.82rem; }
+  .empty-icon { font-size:2rem; margin-bottom:8px; }
+
+  .loading { display:flex; align-items:center; justify-content:center; padding:40px; }
+  .spinner { width:24px; height:24px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; padding:10px 0 20px; z-index:10; }
+  .nav-btn { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:0.62rem; color:var(--muted); text-decoration:none; cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; padding:0 16px; }
+  .nav-btn.active { color:var(--orange); }
+  .nav-icon { font-size:1.2rem; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="dashboard.html">← Retour</a>
+  <div class="logo" id="appName">Flivo</div>
+</div>
+
+<div class="page-content">
+  <div class="page-title">Mes livreurs</div>
+  <div class="page-sub">Enregistre tes livreurs pour ne plus retaper leur nom à chaque fois</div>
+
+  <!-- Formulaire ajout -->
+  <div class="add-card">
+    <div class="add-title">➕ Ajouter un livreur</div>
+    <div class="row2">
+      <div class="field">
+        <label>Nom</label>
+        <input type="text" id="nomLivreur" placeholder="Moussa Koné">
+      </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input type="tel" id="phoneLivreur" placeholder="2250708000000">
+      </div>
+    </div>
+    <button class="add-btn" id="addBtn" onclick="ajouterLivreur()">Enregistrer ce livreur</button>
+    <div class="msg" id="addMsg"></div>
+  </div>
+
+  <!-- Liste -->
+  <div class="section-label">Livreurs enregistrés</div>
+  <div id="listeLivreurs">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a class="nav-btn" href="dashboard.html"><div class="nav-icon">📦</div>Livraisons</a>
+  <a class="nav-btn" href="nouvelle-livraison.html"><div class="nav-icon">➕</div>Nouveau</a>
+  <div class="nav-btn active"><div class="nav-icon">🛵</div>Livreurs</div>
+</div>
+
+<script>
+const sb = window.supabase.createClient(FLIVO_CONFIG.supabase_url, FLIVO_CONFIG.supabase_anon_key)
+document.getElementById('appName').textContent = FLIVO_CONFIG.app_name
+
+let token = null
+
+async function init() {
+  const { data } = await sb.auth.getSession()
+  if (!data.session) { window.location.href = 'login.html'; return }
+  token = data.session.access_token
+  chargerLivreurs()
+}
+
+async function chargerLivreurs() {
+  const res = await fetch('/api/get-livreurs', { headers: { 'Authorization': 'Bearer ' + token } })
+  const data = await res.json()
+  renderLivreurs(data.livreurs || [])
+}
+
+function renderLivreurs(livreurs) {
+  const el = document.getElementById('listeLivreurs')
+  if (livreurs.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🛵</div>Aucun livreur enregistré.<br>Ajoute ton premier livreur ci-dessus.</div>`
+    return
+  }
+  el.innerHTML = `<div class="livreurs-liste">` + livreurs.map(l => `
+    <div class="livreur-card">
+      <div class="livreur-avatar">🧑🏾</div>
+      <div class="livreur-info">
+        <div class="livreur-nom">${l.nom}</div>
+        <div class="livreur-phone">${l.phone}</div>
+        <div class="livreur-count">📦 ${l.livraisons_count} livraison${l.livraisons_count !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="livreur-actions">
+        <a class="action-btn" href="tel:${l.phone}" title="Appeler">📞</a>
+        <a class="action-btn" href="https://wa.me/${l.phone}" target="_blank" title="WhatsApp">💬</a>
+        <button class="action-btn del" onclick="supprimerLivreur(${l.id})" title="Supprimer">🗑️</button>
+      </div>
+    </div>`).join('') + `</div>`
+}
+
+async function ajouterLivreur() {
+  const nom   = document.getElementById('nomLivreur').value.trim()
+  const phone = document.getElementById('phoneLivreur').value.trim()
+  const msg   = document.getElementById('addMsg')
+
+  if (!nom || !phone) {
+    msg.textContent = 'Remplis le nom et le téléphone'
+    msg.className = 'msg error'
+    return
+  }
+
+  const btn = document.getElementById('addBtn')
+  btn.disabled = true
+  btn.textContent = 'Enregistrement...'
+
+  const res  = await fetch('/api/save-livreur', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ nom, phone })
+  })
+  const data = await res.json()
+
+  if (!res.ok) {
+    msg.textContent = data.error || 'Erreur'
+    msg.className = 'msg error'
+  } else {
+    msg.textContent = '✅ Livreur ajouté !'
+    msg.className = 'msg success'
+    document.getElementById('nomLivreur').value = ''
+    document.getElementById('phoneLivreur').value = ''
+    chargerLivreurs()
+  }
+
+  btn.disabled = false
+  btn.textContent = 'Enregistrer ce livreur'
+}
+
+async function supprimerLivreur(id) {
+  if (!confirm('Supprimer ce livreur ?')) return
+  await fetch('/api/save-livreur', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ id })
+  })
+  chargerLivreurs()
+}
+
+init()
+</script>
+</body>
+</html>
