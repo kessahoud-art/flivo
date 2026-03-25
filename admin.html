@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flivo — Admin</title>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0a0a0e; --card:#14141a; --border:#222230;
+    --orange:#ff6b2b; --orange-soft:rgba(255,107,43,0.12);
+    --green:#22c55e; --green-soft:rgba(34,197,94,0.1);
+    --red:#ef4444; --red-soft:rgba(239,68,68,0.1);
+    --blue:#3b82f6; --purple:#8b5cf6;
+    --text:#f0ede8; --muted:#6a6880; --radius:14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; overflow-x:hidden; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding:0 0 40px; }
+
+  /* Topbar admin */
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:16px; background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; }
+  .logo-admin { display:flex; align-items:center; gap:10px; }
+  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1rem; color:var(--orange); }
+  .admin-badge { font-size:0.62rem; background:rgba(139,92,246,0.2); color:var(--purple); border:1px solid rgba(139,92,246,0.3); padding:3px 9px; border-radius:20px; font-weight:700; }
+  .logout-btn { font-size:0.72rem; color:var(--muted); background:transparent; border:1px solid var(--border); padding:6px 12px; border-radius:20px; cursor:pointer; font-family:'DM Sans',sans-serif; }
+  .logout-btn:hover { color:var(--red); border-color:var(--red); }
+
+  .page { width:100%; max-width:520px; margin:0 auto; padding:0 14px; }
+
+  /* KPI Grid */
+  .kpi-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:18px 0 12px; }
+  .kpi { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 12px; }
+  .kpi-val { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:900; margin-bottom:2px; }
+  .kpi-val.orange { color:var(--orange); }
+  .kpi-val.green  { color:var(--green); }
+  .kpi-val.blue   { color:var(--blue); }
+  .kpi-val.purple { color:var(--purple); }
+  .kpi-label { font-size:0.68rem; color:var(--muted); }
+
+  /* Revenus */
+  .rev-card { background:linear-gradient(135deg,rgba(255,107,43,0.15),rgba(255,107,43,0.05)); border:1px solid rgba(255,107,43,0.2); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+  .rev-title { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; margin-bottom:12px; }
+  .rev-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid rgba(255,107,43,0.1); }
+  .rev-row:last-child { border-bottom:none; }
+  .rev-label { font-size:0.75rem; color:var(--muted); }
+  .rev-val { font-family:'Syne',sans-serif; font-size:0.92rem; font-weight:800; color:var(--orange); }
+
+  /* Section label */
+  .sl { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:14px 0 8px; }
+
+  /* Vendeurs table */
+  .vendeur-row { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-bottom:8px; }
+  .vr-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; gap:8px; }
+  .vr-nom { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .vr-plan { font-size:0.65rem; font-weight:700; padding:3px 9px; border-radius:20px; flex-shrink:0; }
+  .vr-plan.free     { background:rgba(106,104,128,0.15); color:var(--muted); }
+  .vr-plan.pro      { background:var(--orange-soft); color:var(--orange); }
+  .vr-plan.business { background:rgba(59,130,246,0.12); color:var(--blue); }
+  .vr-email { font-size:0.72rem; color:var(--muted); margin-bottom:6px; }
+  .vr-stats { display:flex; gap:12px; }
+  .vr-stat { font-size:0.7rem; color:var(--muted); }
+  .vr-stat strong { color:var(--text); }
+  .vr-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .vr-btn { font-size:0.68rem; padding:5px 10px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; white-space:nowrap; }
+  .vr-btn:hover { border-color:var(--orange); color:var(--orange); }
+  .vr-btn.activate { background:var(--green-soft); border-color:rgba(34,197,94,0.3); color:var(--green); }
+  .vr-btn.activate:hover { background:rgba(34,197,94,0.2); }
+  .vr-btn.danger { color:var(--red); border-color:rgba(239,68,68,0.2); }
+  .vr-btn.danger:hover { background:var(--red-soft); }
+
+  /* Plan expire warning */
+  .expire-soon { font-size:0.65rem; color:var(--yellow,#f59e0b); margin-top:4px; }
+
+  /* Recherche */
+  .search-input { width:100%; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:11px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.85rem; outline:none; margin-bottom:10px; }
+  .search-input:focus { border-color:var(--orange); }
+  .search-input::placeholder { color:var(--muted); }
+
+  /* Filters */
+  .filters { display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; scrollbar-width:none; }
+  .filters::-webkit-scrollbar { display:none; }
+  .flt { flex-shrink:0; padding:6px 12px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--muted); font-size:0.72rem; cursor:pointer; font-family:'DM Sans',sans-serif; }
+  .flt.active { background:var(--orange); border-color:var(--orange); color:#fff; font-weight:600; }
+
+  /* Modal activation */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); display:flex; align-items:flex-end; justify-content:center; z-index:100; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  .modal-overlay.show { opacity:1; pointer-events:all; }
+  .modal { width:100%; max-width:520px; background:var(--card); border-radius:20px 20px 0 0; padding:24px 16px 36px; border-top:1px solid var(--border); transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.34,1.2,0.64,1); }
+  .modal-overlay.show .modal { transform:translateY(0); }
+  .modal-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:800; margin-bottom:4px; }
+  .modal-sub { font-size:0.75rem; color:var(--muted); margin-bottom:18px; }
+  .modal-info { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px; margin-bottom:16px; font-size:0.78rem; line-height:1.7; }
+  .modal-info strong { color:var(--orange); }
+  .plan-selector { display:flex; gap:8px; margin-bottom:14px; }
+  .plan-opt { flex:1; padding:10px; border-radius:10px; border:1.5px solid var(--border); background:transparent; color:var(--text); font-family:'Syne',sans-serif; font-weight:700; font-size:0.78rem; cursor:pointer; text-align:center; transition:all 0.2s; }
+  .plan-opt.selected.orange { border-color:var(--orange); background:var(--orange-soft); color:var(--orange); }
+  .plan-opt.selected.blue { border-color:var(--blue); background:rgba(59,130,246,0.1); color:var(--blue); }
+  .activate-btn { width:100%; padding:14px; background:var(--green); border:none; border-radius:12px; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem; cursor:pointer; transition:opacity 0.2s; }
+  .activate-btn:hover { opacity:0.9; }
+  .activate-btn:disabled { opacity:0.5; pointer-events:none; }
+  .cancel-btn { width:100%; padding:11px; background:transparent; border:1px solid var(--border); border-radius:12px; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.82rem; cursor:pointer; margin-top:8px; }
+
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--green); color:#fff; font-size:0.8rem; font-weight:600; padding:10px 20px; border-radius:20px; z-index:200; transition:transform 0.3s; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  .loading { display:flex; align-items:center; justify-content:center; padding:60px; }
+  .spinner { width:24px; height:24px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  .access-denied { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:80vh; text-align:center; padding:24px; }
+  .access-denied h2 { font-family:'Syne',sans-serif; color:var(--red); margin-bottom:8px; }
+  .access-denied p { font-size:0.82rem; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-admin">
+    <div class="logo">Flivo</div>
+    <div class="admin-badge">ADMIN</div>
+  </div>
+  <button class="logout-btn" onclick="logout()">Déconnexion</button>
+</div>
+
+<div class="page" id="app">
+  <div class="loading"><div class="spinner"></div></div>
+</div>
+
+<!-- Modal activation plan -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">Activer un plan</div>
+    <div class="modal-sub">Le vendeur a payé — active son plan maintenant</div>
+    <div class="modal-info" id="modalInfo"></div>
+    <div class="plan-selector">
+      <button class="plan-opt" id="optPro" onclick="selPlan('pro')">⚡ Pro<br><small>3 500 FCFA</small></button>
+      <button class="plan-opt" id="optBusiness" onclick="selPlan('business')">🏢 Business<br><small>8 000 FCFA</small></button>
+    </div>
+    <button class="activate-btn" id="activateBtn" onclick="confirmerActivation()">✅ Activer le plan — 30 jours</button>
+    <button class="cancel-btn" onclick="fermerModal()">Annuler</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SÉCURITÉ — Admin uniquement ───────────────
+const ADMIN_EMAIL = 'kessahoud@gmail.com'
+
+const sb = window.supabase.createClient(FLIVO_CONFIG.supabase_url, FLIVO_CONFIG.supabase_anon_key)
+
+let _token    = null
+let _vendeurs = []
+let _filtreActif = 'tous'
+let _recherche   = ''
+let _vendeurSelectionne = null
+let _planSelectionne    = 'pro'
+
+async function init() {
+  const { data } = await sb.auth.getSession()
+  if (!data.session) { window.location.href = 'login.html'; return }
+
+  const email = data.session.user.email
+  if (email !== ADMIN_EMAIL) {
+    document.getElementById('app').innerHTML = `
+      <div class="access-denied">
+        <h2>🚫 Accès refusé</h2>
+        <p>Cette page est réservée à l'administrateur Flivo.</p>
+      </div>`
+    return
+  }
+
+  _token = data.session.access_token
+  await chargerDonnees()
+}
+
+async function chargerDonnees() {
+  // Charger tous les vendeurs via Supabase directement (admin a accès service)
+  const { data: vendeurs } = await sb
+    .from('vendeurs')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  const { data: livraisons } = await sb
+    .from('livraisons')
+    .select('vendeur_id, statut, montant, created_at')
+
+  _vendeurs = vendeurs || []
+
+  // Enrichir avec les stats de livraisons
+  _vendeurs = _vendeurs.map(v => {
+    const livs = (livraisons || []).filter(l => l.vendeur_id === v.id)
+    return {
+      ...v,
+      _total_livraisons: livs.length,
+      _livraisons_livrees: livs.filter(l => l.statut === 3).length,
+      _montant_total: livs.filter(l=>l.statut===3).reduce((s,l)=>s+(l.montant||0),0)
+    }
+  })
+
+  renderPage(livraisons || [])
+}
+
+function renderPage(livraisons) {
+  const now      = new Date()
+  const total    = _vendeurs.length
+  const pro      = _vendeurs.filter(v => v.plan === 'pro' || v.plan === 'business').length
+  const free     = _vendeurs.filter(v => v.plan === 'free').length
+  const revMois  = 3500 * _vendeurs.filter(v => {
+    return v.plan === 'pro' && v.plan_expire_le && new Date(v.plan_expire_le) > now
+  }).length + 8000 * _vendeurs.filter(v => {
+    return v.plan === 'business' && v.plan_expire_le && new Date(v.plan_expire_le) > now
+  }).length
+
+  document.getElementById('app').innerHTML = `
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-val orange">${total}</div>
+        <div class="kpi-label">Vendeurs inscrits</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-val green">${pro}</div>
+        <div class="kpi-label">Clients payants</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-val blue">${livraisons.length}</div>
+        <div class="kpi-label">Livraisons créées</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-val purple">${free}</div>
+        <div class="kpi-label">Plan Free</div>
+      </div>
+    </div>
+
+    <!-- Revenus -->
+    <div class="rev-card">
+      <div class="rev-title">💰 Revenus estimés</div>
+      <div class="rev-row">
+        <div class="rev-label">Ce mois (plans actifs)</div>
+        <div class="rev-val">${revMois.toLocaleString('fr-FR')} FCFA</div>
+      </div>
+      <div class="rev-row">
+        <div class="rev-label">Clients Pro actifs</div>
+        <div class="rev-val">${_vendeurs.filter(v=>v.plan==='pro').length} × 3 500</div>
+      </div>
+      <div class="rev-row">
+        <div class="rev-label">Clients Business actifs</div>
+        <div class="rev-val">${_vendeurs.filter(v=>v.plan==='business').length} × 8 000</div>
+      </div>
+    </div>
+
+    <!-- Vendeurs -->
+    <div class="sl">Vendeurs (${total})</div>
+    <input class="search-input" placeholder="🔍 Chercher par email ou boutique..." oninput="filtrerRecherche(this.value)" value="${_recherche}">
+    <div class="filters">
+      <button class="flt ${_filtreActif==='tous'?'active':''}" onclick="filtrer('tous')">Tous (${total})</button>
+      <button class="flt ${_filtreActif==='pro'?'active':''}" onclick="filtrer('pro')">Pro (${_vendeurs.filter(v=>v.plan==='pro').length})</button>
+      <button class="flt ${_filtreActif==='business'?'active':''}" onclick="filtrer('business')">Business (${_vendeurs.filter(v=>v.plan==='business').length})</button>
+      <button class="flt ${_filtreActif==='free'?'active':''}" onclick="filtrer('free')">Free (${free})</button>
+    </div>
+    <div id="listeVendeurs"></div>
+  `
+
+  renderVendeurs()
+}
+
+function renderVendeurs() {
+  const now = new Date()
+  let liste = _vendeurs
+
+  if (_filtreActif !== 'tous') liste = liste.filter(v => v.plan === _filtreActif)
+  if (_recherche) {
+    const q = _recherche.toLowerCase()
+    liste = liste.filter(v =>
+      (v.email||'').toLowerCase().includes(q) ||
+      (v.nom_boutique||'').toLowerCase().includes(q)
+    )
+  }
+
+  const el = document.getElementById('listeVendeurs')
+  if (!el) return
+
+  el.innerHTML = liste.map(v => {
+    const expire = v.plan_expire_le ? new Date(v.plan_expire_le) : null
+    const expireBientot = expire && (expire - now) < 5 * 24 * 60 * 60 * 1000 && expire > now
+    const estExpire = expire && expire < now && v.plan !== 'free'
+
+    return `
+    <div class="vendeur-row">
+      <div class="vr-header">
+        <div class="vr-nom">${v.nom_boutique || 'Boutique sans nom'}</div>
+        <div class="vr-plan ${v.plan || 'free'}">${(v.plan||'free').toUpperCase()}</div>
+      </div>
+      <div class="vr-email">${v.email}</div>
+      <div class="vr-stats">
+        <div class="vr-stat">📦 <strong>${v._total_livraisons}</strong> livraisons</div>
+        <div class="vr-stat">✅ <strong>${v._livraisons_livrees}</strong> livrées</div>
+        <div class="vr-stat">💵 <strong>${v._montant_total.toLocaleString('fr-FR')}</strong> FCFA</div>
+      </div>
+      ${expireBientot ? `<div class="expire-soon">⚠️ Plan expire le ${expire.toLocaleDateString('fr-FR')}</div>` : ''}
+      ${estExpire ? `<div class="expire-soon" style="color:var(--red)">❌ Plan expiré le ${expire.toLocaleDateString('fr-FR')}</div>` : ''}
+      ${expire && !estExpire && v.plan !== 'free' ? `<div class="expire-soon" style="color:var(--muted)">📅 Expire le ${expire.toLocaleDateString('fr-FR')}</div>` : ''}
+      <div class="vr-actions">
+        <button class="vr-btn activate" onclick="ouvrirActivation('${v.id}','${v.email}','${(v.nom_boutique||'').replace(/'/g,"\\'")}')">
+          ⚡ Activer plan
+        </button>
+        <a class="vr-btn" href="https://wa.me/${v.phone}?text=Bonjour%20${encodeURIComponent(v.nom_boutique||'')}%20👋" target="_blank">
+          💬 WhatsApp
+        </a>
+        <button class="vr-btn" onclick="voirLivraisons('${v.id}')">
+          📦 Voir livraisons
+        </button>
+      </div>
+    </div>`
+  }).join('') || '<p style="color:var(--muted);font-size:0.82rem;text-align:center;padding:20px">Aucun résultat</p>'
+}
+
+function filtrer(f) {
+  _filtreActif = f
+  renderVendeurs()
+  document.querySelectorAll('.flt').forEach((el,i) => {
+    el.classList.toggle('active', ['tous','pro','business','free'][i] === f)
+  })
+}
+
+function filtrerRecherche(val) {
+  _recherche = val
+  renderVendeurs()
+}
+
+function ouvrirActivation(id, email, boutique) {
+  _vendeurSelectionne = { id, email, boutique }
+  _planSelectionne    = 'pro'
+  document.getElementById('modalInfo').innerHTML =
+    `<strong>Boutique :</strong> ${boutique}<br><strong>Email :</strong> ${email}`
+  selPlan('pro')
+  document.getElementById('modalOverlay').classList.add('show')
+}
+
+function selPlan(plan) {
+  _planSelectionne = plan
+  document.getElementById('optPro').className      = 'plan-opt' + (plan==='pro'?' selected orange':'')
+  document.getElementById('optBusiness').className = 'plan-opt' + (plan==='business'?' selected blue':'')
+}
+
+async function confirmerActivation() {
+  if (!_vendeurSelectionne) return
+  const btn = document.getElementById('activateBtn')
+  btn.disabled = true
+  btn.textContent = 'Activation...'
+
+  const expireDate = new Date()
+  expireDate.setDate(expireDate.getDate() + 30)
+
+  const { error } = await sb
+    .from('vendeurs')
+    .update({
+      plan: _planSelectionne,
+      plan_expire_le: expireDate.toISOString()
+    })
+    .eq('id', _vendeurSelectionne.id)
+
+  if (error) {
+    alert('Erreur : ' + error.message)
+    btn.disabled = false
+    btn.textContent = '✅ Activer le plan — 30 jours'
+    return
+  }
+
+  fermerModal()
+  showToast(`✅ Plan ${_planSelectionne} activé pour ${_vendeurSelectionne.boutique}`)
+
+  // Mettre à jour localement
+  _vendeurs = _vendeurs.map(v => v.id === _vendeurSelectionne.id
+    ? { ...v, plan: _planSelectionne, plan_expire_le: expireDate.toISOString() }
+    : v)
+  renderVendeurs()
+
+  btn.disabled = false
+  btn.textContent = '✅ Activer le plan — 30 jours'
+}
+
+function voirLivraisons(vendeurId) {
+  // Ouvrir dans le dashboard avec filtre vendeur
+  alert('Fonctionnalité bientôt disponible — Phase 9')
+}
+
+function fermerModal() {
+  document.getElementById('modalOverlay').classList.remove('show')
+  _vendeurSelectionne = null
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), 3000)
+}
+
+async function logout() {
+  await sb.auth.signOut()
+  window.location.href = 'login.html'
+}
+
+init()
+</script>
+</body>
+</html>
