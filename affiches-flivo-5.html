@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flivo — Affiches Marketing</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f8f7f4; --white:#fff; --orange:#ff5c1a;
+    --orange-soft:rgba(255,92,26,0.08); --border:#e5e2da;
+    --green:#16a34a; --text:#1a1814; --muted:#6b6860;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); font-family:'DM Sans',sans-serif; color:var(--text); padding:20px 0 60px; }
+
+  .header { background:var(--white); border-bottom:1px solid var(--border); padding:16px 18px; display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:10; }
+  .logo { font-family:'Syne',sans-serif; font-weight:900; font-size:1.2rem; color:var(--orange); }
+  .header-sub { font-size:0.76rem; color:var(--muted); }
+
+  .content { max-width:640px; margin:0 auto; padding:0 14px; }
+
+  /* Strategy tabs */
+  .tabs { display:flex; background:var(--white); border-radius:10px; padding:3px; margin:20px 0 0; gap:3px; border:1px solid var(--border); }
+  .tab { flex:1; padding:9px 6px; border:none; background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.74rem; font-weight:500; border-radius:8px; cursor:pointer; transition:all 0.2s; }
+  .tab.active { background:var(--orange); color:#fff; font-weight:700; }
+
+  .section { display:none; padding-top:20px; }
+  .section.active { display:block; }
+
+  /* Affiche container */
+  .affiche-block { margin-bottom:28px; }
+  .affiche-title { font-family:'Syne',sans-serif; font-size:0.9rem; font-weight:700; margin-bottom:4px; }
+  .affiche-desc  { font-size:0.74rem; color:var(--muted); margin-bottom:10px; }
+  canvas { display:block; width:100%; max-width:420px; border-radius:10px; border:1px solid var(--border); }
+
+  .dl-btn { display:inline-flex; align-items:center; gap:7px; margin-top:9px; padding:10px 18px; background:var(--orange); border:none; border-radius:9px; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.78rem; cursor:pointer; transition:opacity 0.2s; }
+  .dl-btn:hover { opacity:0.9; }
+
+  /* Caption */
+  .caption-box { margin-top:9px; background:var(--white); border:1px solid var(--border); border-radius:9px; padding:11px 13px; }
+  .caption-label { font-size:0.6rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:5px; font-weight:700; }
+  .caption-text { font-size:0.74rem; color:var(--text); line-height:1.7; white-space:pre-wrap; }
+  .copy-btn { display:inline-flex; align-items:center; gap:5px; margin-top:7px; padding:6px 12px; background:transparent; border:1px solid var(--border); border-radius:7px; color:var(--muted); font-size:0.7rem; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
+  .copy-btn:hover { border-color:var(--orange); color:var(--orange); }
+
+  /* Strategy cards */
+  .strat-card { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:10px; }
+  .strat-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .strat-icon { font-size:1.3rem; }
+  .strat-name { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; }
+  .strat-freq  { font-size:0.68rem; background:var(--orange-soft); color:var(--orange); padding:3px 8px; border-radius:20px; font-weight:700; }
+  .strat-body  { font-size:0.76rem; color:var(--muted); line-height:1.65; }
+  .strat-body strong { color:var(--text); }
+  .strat-steps { margin-top:8px; display:flex; flex-direction:column; gap:4px; }
+  .strat-step  { display:flex; gap:7px; font-size:0.74rem; color:var(--muted); }
+  .step-num    { width:18px; height:18px; border-radius:50%; background:var(--orange-soft); color:var(--orange); font-weight:700; font-size:0.62rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+  .divider { height:1px; background:var(--border); margin:16px 0; }
+  .alert { background:var(--orange-soft); border:1px solid rgba(255,92,26,0.2); border-radius:9px; padding:11px 13px; font-size:0.76rem; color:#c2410c; margin-bottom:12px; line-height:1.55; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">Flivo</div>
+    <div class="header-sub">Affiches marketing + Stratégie trafic gratuit</div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="tabs">
+  <button class="tab active" onclick="goTo('affiches')">🎨 Affiches</button>
+  <button class="tab" onclick="goTo('whatsapp')">💬 WhatsApp</button>
+  <button class="tab" onclick="goTo('tiktok')">🎵 TikTok</button>
+  <button class="tab" onclick="goTo('facebook')">📘 Facebook</button>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- AFFICHES                           -->
+<!-- ═══════════════════════════════════ -->
+<div class="section active" id="affiches">
+
+  <!-- Affiche 1 — WhatsApp / Facebook carré -->
+  <div class="affiche-block">
+    <div class="affiche-title">Affiche 1 — "Le problème" · Facebook/WhatsApp</div>
+    <div class="affiche-desc">Format carré 1080×1080 · Vendeur stressé par les appels · Fond orange vif</div>
+    <canvas id="a1" width="1080" height="1080"></canvas>
+    <button class="dl-btn" onclick="dl('a1','flivo-affiche-probleme')">⬇️ Télécharger</button>
+    <div class="caption-box">
+      <div class="caption-label">Texte à poster</div>
+      <div class="caption-text" id="cap1">📞 "Allô, mon colis est où ?"
+📞 "C'est livré ?"
+📞 "Ton livreur répond pas !"
+
+Tu connais ces appels 😩
+
+Flivo envoie un lien de suivi à ton client
+dès que tu crées une livraison.
+Il suit son colis lui-même. 0 appel.
+
+✅ Gratuit → flivo.vercel.app
+
+#venteenligne #livraisonafrique #vendeurCI</div>
+      <button class="copy-btn" onclick="cp('cap1')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Affiche 2 — Avant/Après -->
+  <div class="affiche-block">
+    <div class="affiche-title">Affiche 2 — "Avant / Après" · Facebook</div>
+    <div class="affiche-desc">Contraste fort · Sombre vs lumineux · Fort engagement</div>
+    <canvas id="a2" width="1080" height="1080"></canvas>
+    <button class="dl-btn" onclick="dl('a2','flivo-affiche-avant-apres')">⬇️ Télécharger</button>
+    <div class="caption-box">
+      <div class="caption-label">Texte à poster</div>
+      <div class="caption-text" id="cap2">La différence entre un vendeur Flivo
+et un vendeur sans Flivo 👇
+
+SANS FLIVO 😤
+❌ 15 appels/jour
+❌ Clients stressés
+❌ Commandes annulées
+
+AVEC FLIVO ✅
+✅ 0 appel de suivi
+✅ Clients satisfaits
+✅ Plus de ventes
+
+Essaie gratuitement → flivo.vercel.app
+
+#transformation #ecommerceafrique #livraisonCI</div>
+      <button class="copy-btn" onclick="cp('cap2')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Affiche 3 — TikTok vertical -->
+  <div class="affiche-block">
+    <div class="affiche-title">Affiche 3 — TikTok Story · Format vertical</div>
+    <div class="affiche-desc">Format 1080×1920 · Vendeur victorieux · Impact visuel fort</div>
+    <canvas id="a3" width="1080" height="1920" style="max-width:220px"></canvas>
+    <button class="dl-btn" onclick="dl('a3','flivo-affiche-tiktok')">⬇️ Télécharger</button>
+    <div class="caption-box">
+      <div class="caption-label">Texte TikTok (voix off)</div>
+      <div class="caption-text" id="cap3">POV : tu vends en ligne en Afrique
+et tes clients t'appellent 10x par jour
+pour demander où est leur colis 😤
+
+J'ai trouvé la solution 🔥
+
+Avec Flivo, je crée la livraison en 30 secondes
+et mon client reçoit un lien de suivi automatiquement.
+
+Il suit son colis lui-même.
+Moi je vends. 💪
+
+Lien en bio → flivo.vercel.app
+
+#flivo #venteenligne #vendeurafricain #tiktokafrique</div>
+      <button class="copy-btn" onclick="cp('cap3')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Affiche 4 — Tarifs -->
+  <div class="affiche-block">
+    <div class="affiche-title">Affiche 4 — "Tarifs" · Facebook/WhatsApp</div>
+    <div class="affiche-desc">Fond blanc propre · Prix clairs · Converti bien</div>
+    <canvas id="a4" width="1080" height="1080"></canvas>
+    <button class="dl-btn" onclick="dl('a4','flivo-affiche-tarifs')">⬇️ Télécharger</button>
+    <div class="caption-box">
+      <div class="caption-label">Texte à poster</div>
+      <div class="caption-text" id="cap4">Combien coûte Flivo ? 💰
+
+🆓 GRATUIT
+→ 20 livraisons/mois
+→ Toutes fonctionnalités
+→ 0 FCFA
+
+⭐ PRO — 3 500 FCFA/mois
+→ Livraisons illimitées
+→ Stats avancées + Export CSV
+→ Support WhatsApp 7j/7
+
+Paiement Wave · Orange Money · MTN
+
+Commence gratuitement → flivo.vercel.app
+
+#prix #livraisonabidjan #wave #orangemoney</div>
+      <button class="copy-btn" onclick="cp('cap4')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Affiche 5 — WhatsApp statut -->
+  <div class="affiche-block">
+    <div class="affiche-title">Affiche 5 — Statut WhatsApp · Format portrait</div>
+    <div class="affiche-desc">Format 1080×1920 · Simple · Pour statut WhatsApp</div>
+    <canvas id="a5" width="1080" height="1920" style="max-width:220px"></canvas>
+    <button class="dl-btn" onclick="dl('a5','flivo-statut-whatsapp')">⬇️ Télécharger</button>
+    <div class="caption-box">
+      <div class="caption-label">Message d'accompagnement</div>
+      <div class="caption-text" id="cap5">Tu vends en ligne ?
+Tes clients t'appellent pour leur colis ?
+
+Je viens de trouver un outil qui règle ça.
+Gratuit pour commencer 👇
+
+flivo.vercel.app</div>
+      <button class="copy-btn" onclick="cp('cap5')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Affiche 6 — Sondage engagement -->
+  <div class="affiche-block">
+    <div class="affiche-title">Affiche 6 — "Sondage" · Facebook (engagement)</div>
+    <div class="affiche-desc">Génère des commentaires · Booste l'algorithme gratuitement</div>
+    <canvas id="a6" width="1080" height="1080"></canvas>
+    <button class="dl-btn" onclick="dl('a6','flivo-affiche-sondage')">⬇️ Télécharger</button>
+    <div class="caption-box">
+      <div class="caption-label">Texte à poster</div>
+      <div class="caption-text" id="cap6">Sondage pour les vendeurs 🙋
+
+Combien de fois tes clients t'appellent
+pour demander où est leur commande ?
+
+A) 1–5 fois → tu gères 😅
+B) 5–15 fois → c'est fatiguant 😤
+C) +15 fois → tu as besoin de Flivo 😂
+
+Réponds en commentaire !
+
+Ceux qui répondent B ou C :
+flivo.vercel.app → solution gratuite 👇
+
+#sondage #vendeurCI #venteenligne #ecommerce</div>
+      <button class="copy-btn" onclick="cp('cap6')">📋 Copier</button>
+    </div>
+  </div>
+
+</div><!-- end affiches -->
+
+<!-- ═══════════════════════════════════ -->
+<!-- WHATSAPP STRATÉGIE                 -->
+<!-- ═══════════════════════════════════ -->
+<div class="section" id="whatsapp">
+
+  <div class="alert">🎯 Objectif : 10 premiers vendeurs en 7 jours sans dépenser un seul FCFA.</div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">📢</div>
+      <div class="strat-name">Statut WhatsApp quotidien</div>
+      <div class="strat-freq">1x / jour</div>
+    </div>
+    <div class="strat-body">
+      Poste l'<strong>Affiche 5</strong> en statut chaque matin à 8h. Tes contacts voient ton statut 24h. Ajoute le message d'accompagnement. C'est la stratégie la plus simple et la plus efficace.
+    </div>
+    <div class="strat-steps">
+      <div class="strat-step"><div class="step-num">1</div><span>Lundi → Affiche 5 "Statut" + message court</span></div>
+      <div class="strat-step"><div class="step-num">2</div><span>Mardi → Capture du dashboard Flivo + "Gratuit, essaie ici"</span></div>
+      <div class="strat-step"><div class="step-num">3</div><span>Mercredi → Affiche 1 "Problème appels" + lien</span></div>
+      <div class="strat-step"><div class="step-num">4</div><span>Jeudi → Témoignage fictif ou vrai + lien</span></div>
+      <div class="strat-step"><div class="step-num">5</div><span>Vendredi → Affiche 4 "Tarifs" + "Gratuit pour commencer"</span></div>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">💬</div>
+      <div class="strat-name">DM direct aux vendeurs</div>
+      <div class="strat-freq">20 DM / jour</div>
+    </div>
+    <div class="strat-body">
+      Cherche des vendeurs en ligne dans ta liste ou sur Facebook. Envoie ce message :
+    </div>
+    <div class="caption-box" style="margin-top:8px">
+      <div class="caption-label">Message à envoyer</div>
+      <div class="caption-text" id="dmWa">Bonjour 👋
+
+J'ai vu que tu fais des livraisons.
+
+J'ai créé un outil qui envoie un lien de suivi
+automatiquement à tes clients.
+Ils suivent leur colis sans t'appeler.
+
+Gratuit pour 20 livraisons/mois.
+Tu veux essayer ? → flivo.vercel.app</div>
+      <button class="copy-btn" onclick="cp('dmWa')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">👥</div>
+      <div class="strat-name">Groupes WhatsApp vendeurs</div>
+      <div class="strat-freq">3x / semaine</div>
+    </div>
+    <div class="strat-body">
+      Rejoins des groupes WhatsApp de vendeurs, commerçants, livreurs dans ta région. Poste ce message max 1x par groupe par semaine pour ne pas être bloqué.
+    </div>
+    <div class="caption-box" style="margin-top:8px">
+      <div class="caption-label">Message pour les groupes</div>
+      <div class="caption-text" id="grpWa">Bonjour à tous 👋
+
+Je cherche 5 vendeurs qui font des livraisons
+pour tester gratuitement mon outil.
+
+✅ Tu crées la livraison en 30 sec
+✅ Ton client reçoit un lien de suivi
+✅ Il suit son colis sans t'appeler
+✅ 0 FCFA pour commencer
+
+Intéressé ? Réponds "OUI" ou écris-moi 🙏
+flivo.vercel.app</div>
+      <button class="copy-btn" onclick="cp('grpWa')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">🔄</div>
+      <div class="strat-name">Repartage viral</div>
+      <div class="strat-freq">Ponctuel</div>
+    </div>
+    <div class="strat-body">
+      Quand un de tes premiers utilisateurs est satisfait, demande-lui de partager ton statut à ses contacts. <strong>1 utilisateur satisfait = 5 nouveaux contacts potentiels.</strong>
+    </div>
+    <div class="caption-box" style="margin-top:8px">
+      <div class="caption-label">Message à envoyer à tes premiers utilisateurs</div>
+      <div class="caption-text" id="viralWa">Bonjour 👋
+
+Merci d'utiliser Flivo 🙏
+
+Si l'outil t'a aidé, est-ce que tu peux
+partager ce message à 3 vendeurs que tu connais ?
+
+flivo.vercel.app — Gratuit pour commencer
+
+Ça m'aide beaucoup 🙏</div>
+      <button class="copy-btn" onclick="cp('viralWa')">📋 Copier</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- TIKTOK STRATÉGIE                   -->
+<!-- ═══════════════════════════════════ -->
+<div class="section" id="tiktok">
+
+  <div class="alert">🎯 TikTok Afrique explose. Un seul viral = 50 000+ vues. Investissement : 0 FCFA.</div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">📱</div>
+      <div class="strat-name">Créer le compte TikTok</div>
+      <div class="strat-freq">Jour 1</div>
+    </div>
+    <div class="strat-body">
+      Nom du compte : <strong>@flivo.app</strong> ou <strong>@flivo_livraison</strong><br>
+      Bio : "Suivi livraisons pour vendeurs africains 📦 Gratuit → flivo.vercel.app"
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">🎬</div>
+      <div class="strat-name">Format vidéo qui cartonne</div>
+      <div class="strat-freq">3x / semaine</div>
+    </div>
+    <div class="strat-body">
+      <strong>Format gagnant : "Problème → Solution → Démo" en 30-60 secondes</strong>
+    </div>
+    <div class="strat-steps">
+      <div class="strat-step"><div class="step-num">1</div><span><strong>Sec 0-5 :</strong> Accroche choc — montre le problème (appels qui arrivent)</span></div>
+      <div class="strat-step"><div class="step-num">2</div><span><strong>Sec 5-15 :</strong> "J'ai trouvé la solution" — intro Flivo</span></div>
+      <div class="strat-step"><div class="step-num">3</div><span><strong>Sec 15-45 :</strong> Screen recording : créer une livraison en 30 sec</span></div>
+      <div class="strat-step"><div class="step-num">4</div><span><strong>Sec 45-60 :</strong> Montrer le lien tracking reçu · "Gratuit, lien en bio"</span></div>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">🎯</div>
+      <div class="strat-name">5 idées de vidéos</div>
+      <div class="strat-freq">Planifier 2 semaines</div>
+    </div>
+    <div class="strat-steps">
+      <div class="strat-step"><div class="step-num">1</div><span><strong>POV :</strong> "Je suis vendeur et j'en avais marre des appels... voici ce que j'ai trouvé"</span></div>
+      <div class="strat-step"><div class="step-num">2</div><span><strong>Démo rapide :</strong> Screen recording — créer livraison en 30 secondes</span></div>
+      <div class="strat-step"><div class="step-num">3</div><span><strong>Réaction :</strong> "Mon client a reçu son lien de tracking... voici sa réaction"</span></div>
+      <div class="strat-step"><div class="step-num">4</div><span><strong>Comparaison :</strong> "Vendeur sans Flivo vs vendeur avec Flivo"</span></div>
+      <div class="strat-step"><div class="step-num">5</div><span><strong>Tutorial :</strong> "Comment envoyer un lien de suivi à ton client en 30 sec"</span></div>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">#️⃣</div>
+      <div class="strat-name">Hashtags TikTok Afrique</div>
+      <div class="strat-freq">Sur chaque vidéo</div>
+    </div>
+    <div class="caption-box" style="margin-top:8px">
+      <div class="caption-label">Hashtags à copier</div>
+      <div class="caption-text" id="hashTiktok">#venteenligne #vendeurafricain #cotedivoire #abidjan #livraisonafrique #ecommerceafrique #flivo #businessafrique #vendeursenegal #tiktokabidjan #commerceafrique #entrepreneurafricain</div>
+      <button class="copy-btn" onclick="cp('hashTiktok')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">⏰</div>
+      <div class="strat-name">Meilleurs horaires de publication</div>
+      <div class="strat-freq">À respecter</div>
+    </div>
+    <div class="strat-body">
+      <strong>Lundi–Vendredi :</strong> 12h-13h (pause déjeuner) et 19h-21h (soirée)<br>
+      <strong>Weekend :</strong> 10h-12h et 20h-22h<br><br>
+      <strong>Règle d'or TikTok :</strong> Réponds à TOUS les commentaires dans les 30 premières minutes après publication. L'algorithme mesure l'engagement rapide.
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- FACEBOOK STRATÉGIE                 -->
+<!-- ═══════════════════════════════════ -->
+<div class="section" id="facebook">
+
+  <div class="alert">🎯 Facebook = le meilleur canal pour les vendeurs africains. Groupes + Page + Ads gratuits.</div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">📄</div>
+      <div class="strat-name">Configurer la Page Flivo</div>
+      <div class="strat-freq">Jour 1 — 20 min</div>
+    </div>
+    <div class="strat-steps">
+      <div class="strat-step"><div class="step-num">1</div><span>Créer la page : "Flivo" · Catégorie : Application logicielle</span></div>
+      <div class="strat-step"><div class="step-num">2</div><span>Photo de profil : logo Flivo (icône orange)</span></div>
+      <div class="strat-step"><div class="step-num">3</div><span>Couverture : Affiche 1 recadrée</span></div>
+      <div class="strat-step"><div class="step-num">4</div><span>Bouton d'action : "En savoir plus" → flivo.vercel.app</span></div>
+      <div class="strat-step"><div class="step-num">5</div><span>Premier post épinglé : présentation + lien</span></div>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">📅</div>
+      <div class="strat-name">Calendrier Facebook — 3 semaines</div>
+      <div class="strat-freq">5x / semaine</div>
+    </div>
+    <div class="strat-steps">
+      <div class="strat-step"><div class="step-num">L</div><span><strong>Lundi :</strong> Affiche 1 (problème) sur ta page + 3 groupes vendeurs</span></div>
+      <div class="strat-step"><div class="step-num">M</div><span><strong>Mardi :</strong> Story démo vidéo (screen recording Flivo)</span></div>
+      <div class="strat-step"><div class="step-num">M</div><span><strong>Mercredi :</strong> Affiche 6 (sondage) → génère des commentaires</span></div>
+      <div class="strat-step"><div class="step-num">J</div><span><strong>Jeudi :</strong> Affiche 2 (avant/après) + témoignage</span></div>
+      <div class="strat-step"><div class="step-num">V</div><span><strong>Vendredi :</strong> Affiche 4 (tarifs) + CTA fort</span></div>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">👥</div>
+      <div class="strat-name">Groupes Facebook à rejoindre</div>
+      <div class="strat-freq">Cherche ces groupes</div>
+    </div>
+    <div class="strat-body">
+      Rejoins ces groupes et poste max 2x par semaine par groupe :
+    </div>
+    <div class="strat-steps">
+      <div class="strat-step"><div class="step-num">1</div><span>"Vendeurs en ligne Côte d'Ivoire"</span></div>
+      <div class="strat-step"><div class="step-num">2</div><span>"Commerce Abidjan / Dakar / Cotonou"</span></div>
+      <div class="strat-step"><div class="step-num">3</div><span>"E-commerce Bénin / Togo / Mali / Sénégal"</span></div>
+      <div class="strat-step"><div class="step-num">4</div><span>"Vente WhatsApp Afrique"</span></div>
+      <div class="strat-step"><div class="step-num">5</div><span>"Entrepreneurs Afrique de l'Ouest"</span></div>
+      <div class="strat-step"><div class="step-num">6</div><span>"Livraison / Logistique Afrique"</span></div>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">💬</div>
+      <div class="strat-name">Réponses types aux commentaires</div>
+      <div class="strat-freq">Répondre sous 1h</div>
+    </div>
+    <div class="caption-box" style="margin-top:8px">
+      <div class="caption-label">Modèles de réponse</div>
+      <div class="caption-text" id="repFb">"C'est quoi ça ?" → Flivo c'est un outil qui envoie un lien de suivi à tes clients dès que tu crées une livraison. Essaie gratuitement → flivo.vercel.app 🙏
+
+"Ça marche pour [ville] ?" → Oui ! Partout en Afrique — Abidjan, Dakar, Cotonou, Bamako... C'est un lien, pas de limite géo 🌍
+
+"C'est combien ?" → Gratuit jusqu'à 20 livraisons/mois. Après : 3 500 FCFA/mois pour illimité 😊
+
+"Comment je paie ?" → Wave, Orange Money, MTN. Tu me contactes sur WhatsApp : wa.me/22996830775</div>
+      <button class="copy-btn" onclick="cp('repFb')">📋 Copier</button>
+    </div>
+  </div>
+
+  <div class="strat-card">
+    <div class="strat-header">
+      <div class="strat-icon">🚀</div>
+      <div class="strat-name">Première pub payante (optionnel)</div>
+      <div class="strat-freq">Semaine 2</div>
+    </div>
+    <div class="strat-body">
+      Quand tu as 5+ inscrits gratuits (preuve que le produit marche) :<br><br>
+      <strong>Budget :</strong> 3 000 FCFA/jour · <strong>Durée :</strong> 5 jours<br>
+      <strong>Objectif :</strong> Trafic · <strong>Visuel :</strong> Affiche 1<br>
+      <strong>Audience :</strong> Côte d'Ivoire · 22-40 ans · Vente en ligne + WhatsApp Business
+    </div>
+  </div>
+
+</div>
+
+</div><!-- end content -->
+
+<script>
+// ═══════════════════════════════════
+// DESSIN DES AFFICHES
+// ═══════════════════════════════════
+
+const OR = '#ff5c1a'   // orange Flivo
+const DK = '#1a1814'   // dark
+const WH = '#ffffff'
+const GR = '#f8f7f4'   // bg gris clair
+const MU = '#6b6860'   // muted
+
+// Helpers
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x+r, y)
+  ctx.lineTo(x+w-r, y)
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r)
+  ctx.lineTo(x+w, y+h-r)
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h)
+  ctx.lineTo(x+r, y+h)
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r)
+  ctx.lineTo(x, y+r)
+  ctx.quadraticCurveTo(x, y, x+r, y)
+  ctx.closePath()
+}
+
+// Dessiner silhouette de personne (stylisée)
+function drawPerson(ctx, x, y, scale, color) {
+  const s = scale
+  ctx.fillStyle = color
+  // Tête
+  ctx.beginPath()
+  ctx.arc(x, y, 40*s, 0, Math.PI*2)
+  ctx.fill()
+  // Corps
+  ctx.beginPath()
+  ctx.ellipse(x, y + 100*s, 55*s, 80*s, 0, 0, Math.PI*2)
+  ctx.fill()
+  // Bras gauche
+  ctx.beginPath()
+  ctx.ellipse(x - 80*s, y + 80*s, 20*s, 70*s, -0.3, 0, Math.PI*2)
+  ctx.fill()
+  // Bras droit
+  ctx.beginPath()
+  ctx.ellipse(x + 80*s, y + 80*s, 20*s, 70*s, 0.3, 0, Math.PI*2)
+  ctx.fill()
+}
+
+// ─── AFFICHE 1 — Problème appels ──────────────────────────────
+function draw1() {
+  const c = document.getElementById('a1')
+  const ctx = c.getContext('2d')
+  const S = 1080
+
+  // Fond orange vif
+  ctx.fillStyle = OR
+  ctx.fillRect(0, 0, S, S)
+
+  // Cercle décoratif fond
+  ctx.fillStyle = 'rgba(255,255,255,0.06)'
+  ctx.beginPath(); ctx.arc(S, 0, 600, 0, Math.PI*2); ctx.fill()
+  ctx.beginPath(); ctx.arc(0, S, 400, 0, Math.PI*2); ctx.fill()
+
+  // Points pattern
+  ctx.fillStyle = 'rgba(0,0,0,0.06)'
+  for (let i=0;i<S;i+=54) for (let j=0;j<S;j+=54) {
+    ctx.beginPath(); ctx.arc(i,j,4,0,Math.PI*2); ctx.fill()
+  }
+
+  // Logo
+  ctx.fillStyle = WH
+  ctx.font = `bold 62px 'Syne', Arial`
+  ctx.textAlign = 'left'
+  ctx.fillText('Flivo', 70, 100)
+
+  // Bulle de téléphone (blanc arrondi)
+  ctx.fillStyle = WH
+  roundRect(ctx, 60, 140, S-120, 340, 30)
+  ctx.fill()
+
+  // Texte dans la bulle
+  ctx.fillStyle = DK
+  ctx.font = `bold 56px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('📞 "Allô, mon colis', S/2, 220)
+  ctx.fillText('est où ?"', S/2, 290)
+  ctx.fillStyle = MU
+  ctx.font = `500 38px 'DM Sans', Arial`
+  ctx.fillText('Tu connais ce message ? 😩', S/2, 380)
+  ctx.fillText('Chaque jour. 10 fois.', S/2, 430)
+
+  // Silhouette vendeur stressé
+  drawPerson(ctx, S/2 - 150, 640, 1.4, 'rgba(0,0,0,0.15)')
+  // Téléphone dans la main
+  ctx.fillStyle = DK
+  roundRect(ctx, S/2 - 60, 660, 55, 90, 8)
+  ctx.fill()
+  ctx.fillStyle = '#333'
+  roundRect(ctx, S/2 - 55, 668, 45, 74, 5)
+  ctx.fill()
+
+  // Cercle "STOP"
+  ctx.fillStyle = DK
+  ctx.beginPath(); ctx.arc(S/2 + 160, 650, 110, 0, Math.PI*2); ctx.fill()
+  ctx.fillStyle = OR
+  ctx.font = `bold 90px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('🚫', S/2+160, 685)
+
+  // Message solution
+  ctx.fillStyle = DK
+  ctx.font = `bold 62px 'Syne', Arial`
+  ctx.fillText('La solution existe.', S/2, 870)
+  ctx.fillStyle = 'rgba(0,0,0,0.5)'
+  ctx.font = `500 42px 'DM Sans', Arial`
+  ctx.fillText('Tes clients suivent leur livraison seuls.', S/2, 935)
+  ctx.fillText('0 appel. 0 stress.', S/2, 985)
+
+  // CTA pill
+  ctx.fillStyle = DK
+  roundRect(ctx, S/2 - 270, 1020, 540, 96, 48)
+  ctx.fill()
+  ctx.fillStyle = OR
+  ctx.font = `bold 42px 'Syne', Arial`
+  ctx.fillText('flivo.vercel.app', S/2, 1082)
+}
+
+// ─── AFFICHE 2 — Avant / Après ────────────────────────────────
+function draw2() {
+  const c = document.getElementById('a2')
+  const ctx = c.getContext('2d')
+  const S = 1080
+
+  // Fond clair
+  ctx.fillStyle = GR
+  ctx.fillRect(0, 0, S, S)
+
+  // Logo
+  ctx.fillStyle = OR
+  ctx.font = `bold 58px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Flivo', S/2, 88)
+
+  ctx.fillStyle = DK
+  ctx.font = `bold 78px 'Syne', Arial`
+  ctx.fillText('Avant vs Après', S/2, 180)
+
+  // Colonne AVANT (gauche — fond sombre)
+  ctx.fillStyle = DK
+  roundRect(ctx, 30, 210, 490, 680, 20)
+  ctx.fill()
+  ctx.fillStyle = OR
+  ctx.font = `bold 44px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('SANS FLIVO', 275, 285)
+
+  // Silhouette triste gauche
+  drawPerson(ctx, 275, 400, 1.1, 'rgba(255,255,255,0.12)')
+
+  const itemsAvant = ['15 appels/jour 📞', 'Clients stressés 😤', 'Commandes annulées ❌', 'Temps gaspillé ⏰']
+  itemsAvant.forEach((t,i) => {
+    ctx.fillStyle = 'rgba(255,255,255,0.65)'
+    ctx.font = `500 30px 'DM Sans', Arial`
+    ctx.textAlign = 'center'
+    ctx.fillText(t, 275, 580 + i*80)
+  })
+
+  // Colonne APRÈS (droite — fond orange)
+  ctx.fillStyle = OR
+  roundRect(ctx, 560, 210, 490, 680, 20)
+  ctx.fill()
+  ctx.fillStyle = DK
+  ctx.font = `bold 44px 'Syne', Arial`
+  ctx.fillText('AVEC FLIVO', 805, 285)
+
+  // Silhouette heureuse droite
+  drawPerson(ctx, 805, 400, 1.1, 'rgba(0,0,0,0.15)')
+  // Étoiles
+  ctx.fillStyle = WH
+  ctx.font = '36px serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('⭐⭐⭐', 805, 330)
+
+  const itemsApres = ['0 appel suivi ✅', 'Clients heureux 😊', 'Plus de ventes 📈', 'Temps libéré 🎉']
+  itemsApres.forEach((t,i) => {
+    ctx.fillStyle = 'rgba(0,0,0,0.75)'
+    ctx.font = `500 30px 'DM Sans', Arial`
+    ctx.textAlign = 'center'
+    ctx.fillText(t, 805, 580 + i*80)
+  })
+
+  // Bas — CTA
+  ctx.fillStyle = WH
+  ctx.font = `bold 38px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Essaie gratuitement →', S/2, 960)
+  ctx.fillStyle = OR
+  ctx.font = `bold 50px 'Syne', Arial`
+  ctx.fillText('flivo.vercel.app', S/2, 1030)
+  ctx.fillStyle = MU
+  ctx.font = `400 32px 'DM Sans', Arial`
+  ctx.fillText('Gratuit · Pas de carte bancaire', S/2, 1075)
+}
+
+// ─── AFFICHE 3 — TikTok vertical ─────────────────────────────
+function draw3() {
+  const c = document.getElementById('a3')
+  const ctx = c.getContext('2d')
+  const W=1080, H=1920
+
+  // Fond dégradé sombre/orange
+  const g = ctx.createLinearGradient(0, 0, 0, H)
+  g.addColorStop(0, '#0f0e0c')
+  g.addColorStop(0.5, '#1a1814')
+  g.addColorStop(1, '#2a1a10')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, W, H)
+
+  // Cercle glow orange
+  const gc = ctx.createRadialGradient(W/2, H*0.35, 0, W/2, H*0.35, 500)
+  gc.addColorStop(0, 'rgba(255,92,26,0.25)')
+  gc.addColorStop(1, 'transparent')
+  ctx.fillStyle = gc
+  ctx.fillRect(0, 0, W, H)
+
+  // Logo Flivo
+  ctx.fillStyle = OR
+  ctx.font = `bold 80px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Flivo', W/2, 120)
+
+  // Silhouette principale — vendeur avec téléphone
+  drawPerson(ctx, W/2, 480, 2.2, 'rgba(255,92,26,0.2)')
+
+  // Téléphone lumineux dans la main
+  ctx.fillStyle = WH
+  roundRect(ctx, W/2 + 100, 520, 120, 200, 18)
+  ctx.fill()
+  ctx.fillStyle = '#e0e0e0'
+  roundRect(ctx, W/2 + 108, 532, 104, 176, 12)
+  ctx.fill()
+  ctx.fillStyle = OR
+  ctx.font = '48px serif'
+  ctx.textAlign = 'center'
+  ctx.fillText('📦', W/2 + 160, 635)
+
+  // Bulles de SMS qui partent
+  const bulles = [{x:W/2-180, y:350, txt:'Livré ✓'}, {x:W/2+220, y:280, txt:'En route 🛵'}, {x:W/2-120, y:210, txt:'Lien envoyé 📲'}]
+  bulles.forEach(b => {
+    ctx.fillStyle = WH
+    ctx.beginPath(); ctx.arc(b.x, b.y, 65, 0, Math.PI*2); ctx.fill()
+    ctx.fillStyle = OR
+    ctx.font = `bold 22px 'DM Sans', Arial`
+    ctx.textAlign = 'center'
+    ctx.fillText(b.txt, b.x, b.y + 8)
+  })
+
+  // Texte principal
+  ctx.fillStyle = WH
+  ctx.font = `bold 88px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Tes clients', W/2, 1020)
+  ctx.fillStyle = OR
+  ctx.fillText('suivent leur', W/2, 1120)
+  ctx.fillStyle = WH
+  ctx.fillText('colis seuls.', W/2, 1220)
+
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'
+  ctx.font = `500 48px 'DM Sans', Arial`
+  ctx.fillText('0 appel. 0 stress. 0 FCFA.', W/2, 1320)
+
+  // Stats
+  const stats = [['30 sec', 'pour créer'], ['0 appel', 'de suivi'], ['100%', 'gratuit']]
+  stats.forEach((s,i) => {
+    const x = 180 + i * 360
+    ctx.fillStyle = 'rgba(255,255,255,0.07)'
+    roundRect(ctx, x-130, 1390, 260, 140, 16)
+    ctx.fill()
+    ctx.fillStyle = OR
+    ctx.font = `bold 54px 'Syne', Arial`
+    ctx.textAlign = 'center'
+    ctx.fillText(s[0], x, 1455)
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'
+    ctx.font = `400 30px 'DM Sans', Arial`
+    ctx.fillText(s[1], x, 1495)
+  })
+
+  // CTA
+  ctx.fillStyle = OR
+  roundRect(ctx, W/2-320, 1580, 640, 120, 60)
+  ctx.fill()
+  ctx.fillStyle = WH
+  ctx.font = `bold 52px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('flivo.vercel.app', W/2, 1652)
+
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.font = `400 38px 'DM Sans', Arial`
+  ctx.fillText('Lien en bio ↑', W/2, 1760)
+
+  // TikTok hashtags
+  ctx.fillStyle = 'rgba(255,255,255,0.2)'
+  ctx.font = `400 26px 'DM Sans', Arial`
+  ctx.fillText('#venteenligne #vendeurafricain #flivo', W/2, 1840)
+  ctx.fillText('#livraisonafrique #ecommerceafrique', W/2, 1880)
+}
+
+// ─── AFFICHE 4 — Tarifs ───────────────────────────────────────
+function draw4() {
+  const c = document.getElementById('a4')
+  const ctx = c.getContext('2d')
+  const S = 1080
+
+  ctx.fillStyle = WH
+  ctx.fillRect(0, 0, S, S)
+
+  // Cercle décoratif
+  const g = ctx.createRadialGradient(S, 0, 0, S, 0, S*0.7)
+  g.addColorStop(0, 'rgba(255,92,26,0.08)')
+  g.addColorStop(1, 'transparent')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, S, S)
+
+  // Logo
+  ctx.fillStyle = OR
+  ctx.font = `bold 60px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Flivo', S/2, 90)
+
+  ctx.fillStyle = DK
+  ctx.font = `bold 78px 'Syne', Arial`
+  ctx.fillText('Nos tarifs', S/2, 190)
+
+  ctx.fillStyle = MU
+  ctx.font = `400 40px 'DM Sans', Arial`
+  ctx.fillText('Simple. Accessible. Africain.', S/2, 255)
+
+  // Card GRATUIT
+  ctx.fillStyle = GR
+  roundRect(ctx, 50, 290, S-100, 280, 22)
+  ctx.fill()
+  ctx.strokeStyle = '#e5e2da'
+  ctx.lineWidth = 2
+  roundRect(ctx, 50, 290, S-100, 280, 22)
+  ctx.stroke()
+
+  // Silhouette small left
+  drawPerson(ctx, 150, 430, 0.8, 'rgba(107,104,96,0.3)')
+
+  ctx.fillStyle = DK
+  ctx.font = `bold 56px 'Syne', Arial`
+  ctx.textAlign = 'left'
+  ctx.fillText('🆓 Gratuit', 230, 370)
+  ctx.font = `bold 82px 'Syne', Arial`
+  ctx.fillStyle = MU
+  ctx.fillText('0 FCFA', 230, 465)
+  ctx.font = `400 34px 'DM Sans', Arial`
+  ctx.fillStyle = MU
+  ctx.fillText('/mois · 20 livraisons · Toutes fonctions', 230, 520)
+  ctx.fillStyle = '#16a34a'
+  ctx.fillText('✓ Tracking · ✓ Livreur · ✓ Dashboard', 230, 560)
+
+  // Card PRO
+  ctx.fillStyle = WH
+  roundRect(ctx, 50, 600, S-100, 340, 22)
+  ctx.fill()
+  ctx.strokeStyle = OR
+  ctx.lineWidth = 3
+  roundRect(ctx, 50, 600, S-100, 340, 22)
+  ctx.stroke()
+
+  // Badge populaire
+  ctx.fillStyle = OR
+  roundRect(ctx, 80, 585, 260, 52, 26)
+  ctx.fill()
+  ctx.fillStyle = WH
+  ctx.font = `bold 28px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('⭐ POPULAIRE', 210, 619)
+
+  // Silhouette heureuse Pro
+  drawPerson(ctx, 160, 770, 0.9, 'rgba(255,92,26,0.2)')
+  ctx.fillStyle = OR
+  ctx.font = `bold 50px 'Syne', Arial`
+  ctx.textAlign = 'left'
+  ctx.fillText('⚡ Pro', 230, 680)
+  ctx.font = `bold 90px 'Syne', Arial`
+  ctx.fillStyle = OR
+  ctx.fillText('3 500 FCFA', 230, 780)
+  ctx.font = `400 34px 'DM Sans', Arial`
+  ctx.fillStyle = MU
+  ctx.fillText('/mois · Livraisons ILLIMITÉES', 230, 830)
+  ctx.fillStyle = '#16a34a'
+  ctx.fillText('✓ Stats · ✓ Export CSV · ✓ Support WA', 230, 875)
+  ctx.fillText('✓ Wave · Orange Money · MTN MoMo', 230, 915)
+
+  // CTA
+  ctx.fillStyle = OR
+  roundRect(ctx, S/2-260, 975, 520, 90, 45)
+  ctx.fill()
+  ctx.font = `bold 42px 'Syne', Arial`
+  ctx.fillStyle = WH
+  ctx.textAlign = 'center'
+  ctx.fillText('flivo.vercel.app', S/2, 1030)
+}
+
+// ─── AFFICHE 5 — WhatsApp statut ─────────────────────────────
+function draw5() {
+  const c = document.getElementById('a5')
+  const ctx = c.getContext('2d')
+  const W=1080, H=1920
+
+  ctx.fillStyle = WH
+  ctx.fillRect(0, 0, W, H)
+
+  // Bande orange haut
+  ctx.fillStyle = OR
+  ctx.fillRect(0, 0, W, 560)
+
+  // Cercle déco
+  const gd = ctx.createRadialGradient(W/2, 280, 0, W/2, 280, 500)
+  gd.addColorStop(0, 'rgba(255,255,255,0.2)')
+  gd.addColorStop(1, 'transparent')
+  ctx.fillStyle = gd
+  ctx.fillRect(0, 0, W, 560)
+
+  // Logo
+  ctx.fillStyle = WH
+  ctx.font = `bold 100px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Flivo', W/2, 200)
+  ctx.font = `400 46px 'DM Sans', Arial`
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'
+  ctx.fillText('Suivi de livraisons pour vendeurs africains', W/2, 280)
+
+  // Silhouette vendeur principale
+  drawPerson(ctx, W/2, 850, 2.8, 'rgba(255,92,26,0.1)')
+
+  // Écran téléphone avec tracking
+  ctx.fillStyle = DK
+  roundRect(ctx, W/2 - 170, 700, 340, 580, 24)
+  ctx.fill()
+  ctx.fillStyle = '#1a1a1a'
+  roundRect(ctx, W/2 - 158, 716, 316, 548, 16)
+  ctx.fill()
+
+  // Contenu écran
+  ctx.fillStyle = OR
+  ctx.font = `bold 28px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Flivo', W/2, 758)
+  ctx.fillStyle = WH
+  ctx.font = `bold 24px 'Syne', Arial`
+  ctx.fillText('Livraison #TRK-48291', W/2, 800)
+
+  // Statuts sur l'écran
+  const ecranStatuts = ['✓ Confirmée', '✓ Colis prêt', '🛵 En route...', '○ Livraison']
+  const ecranColors  = ['#16a34a','#16a34a', OR,'rgba(255,255,255,0.3)']
+  ecranStatuts.forEach((s,i) => {
+    ctx.fillStyle = ecranColors[i]
+    ctx.font = `500 22px 'DM Sans', Arial`
+    ctx.textAlign = 'left'
+    ctx.fillText(s, W/2 - 120, 860 + i*70)
+  })
+
+  // Texte principal bas
+  ctx.fillStyle = DK
+  ctx.font = `bold 80px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Tu vends en ligne ?', W/2, 1430)
+
+  ctx.fillStyle = OR
+  ctx.font = `bold 80px 'Syne', Arial`
+  ctx.fillText('Tes clients t\'appellent', W/2, 1530)
+  ctx.fillText('pour leur colis ?', W/2, 1630)
+
+  ctx.fillStyle = MU
+  ctx.font = `400 50px 'DM Sans', Arial`
+  ctx.fillText('J\'ai trouvé la solution 👇', W/2, 1720)
+
+  // CTA
+  ctx.fillStyle = OR
+  roundRect(ctx, W/2-310, 1770, 620, 120, 60)
+  ctx.fill()
+  ctx.fillStyle = WH
+  ctx.font = `bold 52px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('flivo.vercel.app', W/2, 1845)
+  ctx.fillStyle = MU
+  ctx.font = `400 36px 'DM Sans', Arial`
+  ctx.fillText('Gratuit pour commencer', W/2, 1905)
+}
+
+// ─── AFFICHE 6 — Sondage ─────────────────────────────────────
+function draw6() {
+  const c = document.getElementById('a6')
+  const ctx = c.getContext('2d')
+  const S = 1080
+
+  ctx.fillStyle = GR
+  ctx.fillRect(0, 0, S, S)
+
+  // Bulle principale blanche
+  ctx.fillStyle = WH
+  roundRect(ctx, 40, 40, S-80, S-80, 28)
+  ctx.fill()
+  ctx.strokeStyle = '#e5e2da'
+  ctx.lineWidth = 2
+  roundRect(ctx, 40, 40, S-80, S-80, 28)
+  ctx.stroke()
+
+  // Bande orange top
+  ctx.fillStyle = OR
+  roundRect(ctx, 40, 40, S-80, 180, 28)
+  ctx.fill()
+  // Fix coins bas de la bande
+  ctx.fillRect(40, 150, S-80, 70)
+
+  ctx.fillStyle = WH
+  ctx.font = `bold 56px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Sondage vendeurs 🙋', S/2, 160)
+
+  // Question
+  ctx.fillStyle = DK
+  ctx.font = `bold 66px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Combien de fois', S/2, 320)
+  ctx.fillText('tes clients t\'appellent', S/2, 400)
+  ctx.fillText('pour leur colis ?', S/2, 480)
+
+  // Options
+  const opts = [
+    { label:'A', val:'1–5 fois / semaine', emoji:'😅', color:'#16a34a', bg:'#f0fdf4', border:'rgba(22,163,74,0.2)' },
+    { label:'B', val:'5–15 fois / semaine', emoji:'😤', color:'#d97706', bg:'#fffbeb', border:'rgba(217,119,6,0.2)' },
+    { label:'C', val:'+15 fois → Flivo ! ', emoji:'😂', color:OR,       bg:'rgba(255,92,26,0.06)', border:'rgba(255,92,26,0.2)' },
+  ]
+
+  opts.forEach((o,i) => {
+    const y = 540 + i*142
+    ctx.fillStyle = o.bg
+    roundRect(ctx, 70, y, S-140, 118, 16)
+    ctx.fill()
+    ctx.strokeStyle = o.border
+    ctx.lineWidth = 2
+    roundRect(ctx, 70, y, S-140, 118, 16)
+    ctx.stroke()
+    ctx.fillStyle = o.color
+    ctx.font = `bold 52px 'Syne', Arial`
+    ctx.textAlign = 'left'
+    ctx.fillText(o.label, 110, y+76)
+    ctx.fillStyle = DK
+    ctx.font = `500 42px 'DM Sans', Arial`
+    ctx.fillText(o.val, 180, y+76)
+    ctx.font = '50px serif'
+    ctx.textAlign = 'right'
+    ctx.fillText(o.emoji, S-90, y+76)
+    ctx.textAlign = 'left'
+  })
+
+  // CTA bas
+  ctx.fillStyle = DK
+  ctx.font = `bold 44px 'Syne', Arial`
+  ctx.textAlign = 'center'
+  ctx.fillText('Réponds en commentaire !', S/2, 990)
+  ctx.fillStyle = OR
+  ctx.font = `bold 52px 'Syne', Arial`
+  ctx.fillText('flivo.vercel.app', S/2, 1058)
+}
+
+// ─── Init ─────────────────────────────────────────────────────
+window.onload = () => {
+  draw1(); draw2(); draw3(); draw4(); draw5(); draw6()
+}
+
+// ─── Download ─────────────────────────────────────────────────
+function dl(id, name) {
+  const c = document.getElementById(id)
+  const a = document.createElement('a')
+  a.download = name + '.png'
+  a.href = c.toDataURL('image/png')
+  a.click()
+}
+
+// ─── Copy ─────────────────────────────────────────────────────
+function cp(id) {
+  const text = document.getElementById(id).textContent
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Texte copié !')
+  }).catch(() => {
+    const t = document.createElement('textarea')
+    t.value = text; document.body.appendChild(t); t.select()
+    document.execCommand('copy'); document.body.removeChild(t)
+    alert('Texte copié !')
+  })
+}
+
+// ─── Nav ──────────────────────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  event.target.classList.add('active')
+  window.scrollTo(0,0)
+}
+</script>
+</body>
+</html>
