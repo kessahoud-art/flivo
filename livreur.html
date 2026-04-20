@@ -4,444 +4,184 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flivo — Livreur</title>
-
-<!-- ✅ Config centrale -->
 <script src="config.js"></script>
-<!-- ✅ Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f12; --card: #18181f; --border: #2a2a36;
-    --orange: #ff6b2b; --orange-soft: rgba(255,107,43,0.12);
-    --green: #22c55e; --green-soft: rgba(34,197,94,0.12);
-    --red: #ef4444; --red-soft: rgba(239,68,68,0.1);
-    --blue: #3b82f6; --blue-soft: rgba(59,130,246,0.1);
-    --yellow: #f59e0b; --yellow-soft: rgba(245,158,11,0.1);
-    --text: #f0ede8; --muted: #7a7890; --radius: 18px;
+    --bg:#f8f7f4; --white:#ffffff; --orange:#ff5c1a;
+    --orange-soft:rgba(255,92,26,0.08); --orange-border:rgba(255,92,26,0.2);
+    --green:#16a34a; --green-soft:#f0fdf4; --green-border:rgba(22,163,74,0.2);
+    --red:#dc2626; --red-soft:#fef2f2; --red-border:rgba(220,38,38,0.2);
+    --blue:#2563eb; --blue-soft:#eff6ff; --blue-border:rgba(37,99,235,0.2);
+    --yellow:#d97706; --yellow-soft:#fef9c3;
+    --border:#e5e2da; --text:#1a1814; --muted:#6b6860; --radius:14px;
   }
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh; display: flex;
-    flex-direction: column; align-items: center;
-    padding: 0 0 48px;
-  }
+  html,body { width:100%; overflow-x:hidden; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:0 0 48px; }
 
-  /* Topbar */
-  .topbar {
-    width:100%; display:flex; align-items:center;
-    justify-content:space-between; padding: 20px 22px 0;
-  }
-  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:var(--orange); }
-  .badge-livreur {
-    font-size:0.7rem; color:var(--orange);
-    background:var(--orange-soft); border:1px solid rgba(255,107,43,0.25);
-    padding:5px 10px; border-radius:30px; font-weight:600;
-  }
+  .topbar { width:100%; display:flex; align-items:center; justify-content:space-between; padding:16px 16px 0; background:var(--white); border-bottom:1px solid var(--border); }
+  .logo { font-family:'Syne',sans-serif; font-weight:900; font-size:1.1rem; color:var(--orange); }
+  .mode-badge { font-size:0.68rem; background:var(--orange-soft); color:var(--orange); border:1px solid var(--orange-border); padding:4px 10px; border-radius:20px; font-weight:700; }
 
-  /* Loading & Error */
-  .loading {
-    display:flex; flex-direction:column; align-items:center;
-    justify-content:center; height:60vh; gap:12px;
-    color:var(--muted); font-size:0.9rem;
-  }
-  .spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .error-box { width:calc(100% - 32px); max-width:420px; margin:40px auto; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:var(--radius); padding:24px; text-align:center; }
-  .error-box h3 { font-family:'Syne',sans-serif; color:#ef4444; margin-bottom:8px; }
-  .error-box p { font-size:0.82rem; color:var(--muted); }
+  .commande-card { width:calc(100% - 28px); max-width:420px; margin:16px auto 0; background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+  .order-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:4px; font-weight:600; }
+  .order-code { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:900; color:var(--orange); margin-bottom:12px; }
+  .info-row { display:flex; align-items:flex-start; gap:8px; background:var(--bg); border-radius:9px; padding:9px 11px; border:1px solid var(--border); margin-bottom:7px; }
+  .info-row:last-of-type { margin-bottom:0; }
+  .info-icon { font-size:0.95rem; flex-shrink:0; margin-top:1px; }
+  .info-content {}
+  .info-label { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:1px; font-weight:600; }
+  .info-value { font-size:0.85rem; color:var(--text); font-weight:500; line-height:1.4; }
+  .montant-badge { display:inline-flex; align-items:center; gap:6px; margin-top:12px; background:var(--orange-soft); border:1px solid var(--orange-border); padding:8px 14px; border-radius:10px; font-family:'Syne',sans-serif; font-weight:800; font-size:0.95rem; color:var(--orange); }
 
-  /* Carte commande */
-  .commande-card {
-    width:calc(100% - 32px); max-width:420px;
-    margin:20px auto 0; background:var(--card);
-    border:1px solid var(--border); border-radius:var(--radius);
-    padding:20px; position:relative; overflow:hidden;
-  }
-  .commande-card::before {
-    content:''; position:absolute; top:-30px; left:-30px;
-    width:120px; height:120px;
-    background:radial-gradient(circle,rgba(255,107,43,0.12) 0%,transparent 70%);
-    pointer-events:none;
-  }
-  .order-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:6px; }
-  .order-code { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; color:var(--orange); margin-bottom:14px; }
+  .statut-section { width:calc(100% - 28px); max-width:420px; margin:14px auto 0; }
+  .section-label { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:8px; font-weight:600; }
+  .statut-actuel { display:flex; align-items:center; gap:10px; background:var(--white); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+  .statut-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .statut-dot.active { background:var(--orange); animation:pulse 1.5s infinite; }
+  .statut-dot.done   { background:var(--green); }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+  .statut-text { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; }
 
-  .info-row {
-    display:flex; align-items:flex-start; gap:10px;
-    padding:10px 12px; border-radius:10px;
-    background:rgba(255,255,255,0.03); border:1px solid var(--border);
-    margin-bottom:8px;
-  }
-  .info-row:last-child { margin-bottom:0; }
-  .info-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
-  .info-content { flex:1; }
-  .info-label { font-size:0.68rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px; }
-  .info-value { font-size:0.88rem; color:var(--text); font-weight:500; line-height:1.4; }
+  .actions-section { width:calc(100% - 28px); max-width:420px; margin:12px auto 0; display:flex; flex-direction:column; gap:9px; }
 
-  /* Montant */
-  .montant-badge {
-    display:inline-flex; align-items:center; gap:6px;
-    margin-top:14px;
-    background:rgba(255,107,43,0.08); border:1px solid rgba(255,107,43,0.2);
-    padding:8px 14px; border-radius:10px;
-    font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; color:var(--orange);
-  }
-
-  /* Statut actuel */
-  .statut-section {
-    width:calc(100% - 32px); max-width:420px;
-    margin:16px auto 0;
-  }
-  .section-label {
-    font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em;
-    color:var(--muted); margin-bottom:10px;
-  }
-  .statut-actuel {
-    display:flex; align-items:center; gap:10px;
-    background:var(--card); border:1px solid var(--border);
-    border-radius:12px; padding:14px 16px;
-  }
-  .statut-dot { width:10px; height:10px; border-radius:50%; background:var(--orange); animation:pulse 1.5s infinite; flex-shrink:0; }
-  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
-  .statut-dot.done { background:var(--green); animation:none; }
-  .statut-text { font-family:'Syne',sans-serif; font-size:0.9rem; font-weight:600; }
-
-  /* Boutons d'action */
-  .actions-section {
-    width:calc(100% - 32px); max-width:420px;
-    margin:16px auto 0;
-  }
-  .actions-grid {
-    display:flex; flex-direction:column; gap:10px;
-  }
-
-  .action-btn {
-    width:100%; padding:18px 20px;
-    border-radius:14px; border:2px solid transparent;
-    display:flex; align-items:center; gap:14px;
-    cursor:pointer; font-family:'DM Sans',sans-serif;
-    transition:all 0.18s ease; text-align:left;
-    position:relative; overflow:hidden;
-  }
+  .action-btn { width:100%; padding:17px 18px; border-radius:var(--radius); border:1.5px solid transparent; display:flex; align-items:center; gap:12px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.18s; text-align:left; background:var(--white); }
   .action-btn:active { transform:scale(0.98); }
   .action-btn.disabled { opacity:0.35; pointer-events:none; }
   .action-btn.current { pointer-events:none; }
 
-  /* Variantes */
-  .btn-route   { background:var(--blue-soft);   border-color:rgba(59,130,246,0.25); }
-  .btn-arrive  { background:var(--yellow-soft);  border-color:rgba(245,158,11,0.25); }
-  .btn-livre   { background:var(--green-soft);   border-color:rgba(34,197,94,0.25); }
-  .btn-echec   { background:var(--red-soft);     border-color:rgba(239,68,68,0.25); }
+  .btn-route   { border-color:var(--blue-border);  background:var(--blue-soft); }
+  .btn-route:hover { border-color:var(--blue); }
+  .btn-route.current { border-color:var(--blue); }
+  .btn-livre   { border-color:var(--green-border); background:var(--green-soft); }
+  .btn-livre:hover { border-color:var(--green); }
+  .btn-livre.current { border-color:var(--green); }
+  .btn-echec   { border-color:var(--red-border);   background:var(--red-soft); }
+  .btn-echec:hover { border-color:var(--red); }
+  .btn-echec.current { border-color:var(--red); }
 
-  .btn-route:hover   { border-color:var(--blue);   background:rgba(59,130,246,0.18); }
-  .btn-arrive:hover  { border-color:var(--yellow); background:rgba(245,158,11,0.18); }
-  .btn-livre:hover   { border-color:var(--green);  background:rgba(34,197,94,0.2); }
-  .btn-echec:hover   { border-color:var(--red);    background:rgba(239,68,68,0.18); }
-
-  .btn-route.current   { border-color:var(--blue);   }
-  .btn-arrive.current  { border-color:var(--yellow); }
-  .btn-livre.current   { border-color:var(--green);  }
-  .btn-echec.current   { border-color:var(--red);    }
-
-  .btn-icon { font-size:1.5rem; flex-shrink:0; }
+  .btn-icon { font-size:1.4rem; flex-shrink:0; }
   .btn-body { flex:1; }
-  .btn-title {
-    font-family:'Syne',sans-serif; font-weight:700; font-size:0.95rem;
-    margin-bottom:2px;
-  }
-  .btn-route   .btn-title { color:var(--blue); }
-  .btn-arrive  .btn-title { color:var(--yellow); }
-  .btn-livre   .btn-title { color:var(--green); }
-  .btn-echec   .btn-title { color:var(--red); }
+  .btn-title { font-family:'Syne',sans-serif; font-weight:700; font-size:0.92rem; margin-bottom:2px; }
+  .btn-route .btn-title { color:var(--blue); }
+  .btn-livre .btn-title { color:var(--green); }
+  .btn-echec .btn-title { color:var(--red); }
+  .btn-desc { font-size:0.72rem; color:var(--muted); }
+  .btn-check { font-size:0.9rem; margin-left:auto; flex-shrink:0; }
 
-  .btn-desc { font-size:0.75rem; color:var(--muted); }
-  .btn-check { font-size:1rem; color:var(--green); margin-left:auto; flex-shrink:0; }
-
-  /* Feedback toast */
-  .toast {
-    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
-    background:#1e1e2a; border:1px solid var(--border);
-    color:var(--text); font-size:0.82rem; font-weight:500;
-    padding:12px 20px; border-radius:30px; z-index:999;
-    transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-    white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,0.4);
-  }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-
-  /* Bouton appel client */
-  .contact-section {
-    width:calc(100% - 32px); max-width:420px;
-    margin:16px auto 0; display:flex; gap:10px;
-  }
-  .contact-btn {
-    flex:1; padding:14px; border-radius:12px; border:1px solid var(--border);
-    background:var(--card); color:var(--text); font-family:'DM Sans',sans-serif;
-    font-size:0.82rem; font-weight:500; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    text-decoration:none; transition:all 0.2s;
-  }
+  .contact-section { width:calc(100% - 28px); max-width:420px; margin:12px auto 0; display:flex; gap:9px; }
+  .contact-btn { flex:1; padding:13px; border-radius:12px; border:1px solid var(--border); background:var(--white); color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:500; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; text-decoration:none; transition:all 0.2s; }
   .contact-btn:hover { border-color:var(--orange); color:var(--orange); }
 
-  .gap-sm { height:8px; }
-  .gap-md { height:16px; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--text); color:#fff; font-size:0.8rem; font-weight:600; padding:10px 20px; border-radius:30px; z-index:999; transition:transform 0.3s; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  .loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:60vh; gap:10px; color:var(--muted); font-size:0.86rem; }
+  .spinner { width:26px; height:26px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  .error-box { width:calc(100% - 28px); max-width:420px; margin:40px auto; background:var(--red-soft); border:1px solid var(--red-border); border-radius:var(--radius); padding:24px; text-align:center; }
+  .error-box h3 { font-family:'Syne',sans-serif; color:var(--red); margin-bottom:6px; }
+  .error-box p { font-size:0.8rem; color:var(--muted); }
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div class="logo" id="appName">Flivo</div>
-  <div class="badge-livreur">👤 Mode Livreur</div>
+  <div class="mode-badge">👤 Mode Livreur</div>
 </div>
-
-<div id="app">
-  <div class="loading">
-    <div class="spinner"></div>
-    <span>Chargement de la commande...</span>
-  </div>
-</div>
-
-<!-- Toast notification -->
+<div id="app"><div class="loading"><div class="spinner"></div><span>Chargement...</span></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Init depuis config.js ─────────────────────────
-const sb = window.supabase.createClient(
-  FLIVO_CONFIG.supabase_url,
-  FLIVO_CONFIG.supabase_anon_key
-)
+const sb = window.supabase.createClient(FLIVO_CONFIG.supabase_url, FLIVO_CONFIG.supabase_anon_key)
 document.getElementById('appName').textContent = FLIVO_CONFIG.app_name
-
-// ── Code depuis l'URL ─────────────────────────────
-// URL : /livreur.html?code=TRK-00001
 const params = new URLSearchParams(window.location.search)
-const code = params.get('code')
+const code   = params.get('code')
+const STATUT_LABELS = ['En attente','Prêt','En route','Livré ✓','Échec']
+const CIRCLE_ICONS  = ['📦','📦','🛵','🏁']
+let livraison = null, enCours = false
 
-// ── Config des boutons ────────────────────────────
 const ACTIONS = [
-  {
-    statut: 2,
-    cls: 'btn-route',
-    icon: '🛵',
-    title: 'Je suis en route',
-    desc: 'Appuie quand tu quittes la boutique'
-  },
-  {
-    statut: 3,
-    cls: 'btn-livre',
-    icon: '✅',
-    title: 'Livraison effectuée',
-    desc: 'Colis remis au client, paiement reçu'
-  },
-  {
-    statut: 4,
-    cls: 'btn-echec',
-    icon: '❌',
-    title: 'Échec de livraison',
-    desc: 'Client absent, adresse introuvable...'
-  }
+  { statut:2, cls:'btn-route', icon:'🛵', title:'Je suis en route', desc:'Appuie quand tu quittes la boutique' },
+  { statut:3, cls:'btn-livre', icon:'✅', title:'Livraison effectuée', desc:'Colis remis, paiement reçu' },
+  { statut:4, cls:'btn-echec', icon:'❌', title:'Échec de livraison', desc:'Client absent, adresse introuvable...' }
 ]
 
-const STATUT_LABELS = [
-  'En attente',
-  'Colis prêt',
-  'En route',
-  'Livré ✓',
-  'Échec livraison'
-]
-
-let livraison = null
-let enCours = false
-
-function formatMontant(n) {
-  return Number(n).toLocaleString('fr-FR') + ' FCFA'
-}
-
-// ── Toast ─────────────────────────────────────────
+function fmt(n) { return Number(n).toLocaleString('fr-FR')+' FCFA' }
 function showToast(msg) {
-  const t = document.getElementById('toast')
-  t.textContent = msg
-  t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), 2800)
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),2800)
 }
 
-// ── Rendu principal ───────────────────────────────
+function buildActions(statut) {
+  const el = document.getElementById('actionsGrid'); if(!el) return
+  el.innerHTML = ACTIONS.map(a=>{
+    const isCurrent = statut===a.statut
+    const isDone    = statut>a.statut
+    const cls = ['action-btn',a.cls,isCurrent?'current':'',isDone?'disabled':''].join(' ')
+    return `<button class="${cls}" onclick="changerStatut(${a.statut})">
+      <div class="btn-icon">${a.icon}</div>
+      <div class="btn-body"><div class="btn-title">${a.title}</div><div class="btn-desc">${a.desc}</div></div>
+      ${isCurrent?'<div class="btn-check" style="color:var(--green)">✓ Actuel</div>':''}
+      ${isDone?'<div class="btn-check" style="color:var(--green)">✓</div>':''}
+    </button>`
+  }).join('')
+}
+
 function render(liv) {
   livraison = liv
-  const statut = liv.statut || 0
-
+  const statut = liv.statut||0
   document.getElementById('app').innerHTML = `
-
-    <!-- Carte commande -->
     <div class="commande-card">
       <div class="order-label">Commande à livrer</div>
       <div class="order-code">#${liv.code}</div>
-
-      <div class="info-row">
-        <div class="info-icon">👤</div>
-        <div class="info-content">
-          <div class="info-label">Client</div>
-          <div class="info-value">${liv.client_nom}</div>
-        </div>
-      </div>
-
-      <div class="info-row">
-        <div class="info-icon">📍</div>
-        <div class="info-content">
-          <div class="info-label">Adresse</div>
-          <div class="info-value">${liv.adresse}</div>
-        </div>
-      </div>
-
-      <div class="montant-badge">
-        💵 À encaisser : ${formatMontant(liv.montant)}
-      </div>
+      <div class="info-row"><div class="info-icon">👤</div><div class="info-content"><div class="info-label">Client</div><div class="info-value">${liv.client_nom}</div></div></div>
+      <div class="info-row"><div class="info-icon">📍</div><div class="info-content"><div class="info-label">Adresse</div><div class="info-value">${liv.adresse}</div></div></div>
+      <div class="montant-badge">💵 À encaisser : ${fmt(liv.montant)}</div>
     </div>
-
-    <!-- Statut actuel -->
     <div class="statut-section">
       <div class="section-label">Statut actuel</div>
       <div class="statut-actuel">
-        <div class="statut-dot ${statut >= 3 ? 'done' : ''}"></div>
+        <div class="statut-dot ${statut>=3?'done':'active'}"></div>
         <div class="statut-text" id="statutLabel">${STATUT_LABELS[statut]}</div>
       </div>
     </div>
-
-    <!-- Actions -->
-    <div class="actions-section">
-      <div class="section-label">Changer le statut</div>
-      <div class="actions-grid" id="actionsGrid"></div>
-    </div>
-
-    <!-- Contacter le client -->
+    <div class="actions-section" id="actionsGrid"></div>
     <div class="contact-section">
-      <a class="contact-btn" href="tel:${liv.client_phone}">
-        📞 Appeler le client
-      </a>
-      <a class="contact-btn"
-         href="https://wa.me/${liv.client_phone}?text=Bonjour%20${encodeURIComponent(liv.client_nom)}%2C%20je%20suis%20votre%20livreur%20Flivo%20pour%20la%20commande%20%23${liv.code}"
-         target="_blank">
-        💬 WhatsApp
-      </a>
-    </div>
-    <div class="gap-md"></div>
-  `
-
+      <a class="contact-btn" href="tel:${liv.client_phone}">📞 Appeler le client</a>
+      <a class="contact-btn" href="https://wa.me/${liv.client_phone}?text=${encodeURIComponent(`Bonjour ${liv.client_nom}, je suis votre livreur pour la commande #${liv.code}`)}" target="_blank">💬 WhatsApp</a>
+    </div>`
   buildActions(statut)
 }
 
-// ── Rendu des boutons ─────────────────────────────
-function buildActions(statut) {
-  const grid = document.getElementById('actionsGrid')
-  if (!grid) return
-  let html = ''
-  ACTIONS.forEach(a => {
-    const isCurrent = statut === a.statut
-    const isDone    = statut > a.statut
-    const cls = [
-      'action-btn',
-      a.cls,
-      isCurrent ? 'current' : '',
-      isDone    ? 'disabled' : ''
-    ].join(' ')
-
-    html += `
-      <button class="${cls}" onclick="changerStatut(${a.statut})">
-        <div class="btn-icon">${a.icon}</div>
-        <div class="btn-body">
-          <div class="btn-title">${a.title}</div>
-          <div class="btn-desc">${a.desc}</div>
-        </div>
-        ${isCurrent ? '<div class="btn-check">✓ Actuel</div>' : ''}
-        ${isDone    ? '<div class="btn-check">✓</div>' : ''}
-      </button>`
-  })
-  grid.innerHTML = html
-}
-
-// ── Changer le statut ─────────────────────────────
 async function changerStatut(nouveauStatut) {
-  if (enCours) return
-  enCours = true
-
-  // Feedback visuel immédiat
+  if (enCours) return; enCours=true
   showToast('Mise à jour en cours...')
-
   try {
-    const res = await fetch('/api/update-statut', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: livraison.code, statut: nouveauStatut })
-    })
-
+    const res  = await fetch('/api/update-statut',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:livraison.code,statut:nouveauStatut})})
     const data = await res.json()
-
-    if (!res.ok || !data.success) {
-      showToast('❌ Erreur — réessaie')
-      enCours = false
-      return
-    }
-
-    // Mise à jour locale
+    if (!res.ok||!data.success) { showToast('❌ Erreur — réessaie'); enCours=false; return }
     livraison.statut = nouveauStatut
-    livraison.updated_at = data.livraison.updated_at
-
-    // Mettre à jour l'affichage
-    const statutLabel = document.getElementById('statutLabel')
-    if (statutLabel) statutLabel.textContent = STATUT_LABELS[nouveauStatut]
-
+    const lbl = document.getElementById('statutLabel')
+    if (lbl) lbl.textContent = STATUT_LABELS[nouveauStatut]
     const dot = document.querySelector('.statut-dot')
-    if (dot) dot.className = 'statut-dot ' + (nouveauStatut >= 3 ? 'done' : '')
-
+    if (dot) dot.className = 'statut-dot '+(nouveauStatut>=3?'done':'active')
     buildActions(nouveauStatut)
-
-    // Message de confirmation
-    const messages = {
-      2: '🛵 Statut mis à jour — Bonne route !',
-      3: '✅ Livraison confirmée — Merci !',
-      4: '❌ Échec enregistré'
-    }
-    showToast(messages[nouveauStatut] || 'Statut mis à jour')
-
-  } catch (err) {
-    showToast('❌ Pas de connexion — réessaie')
-  }
-
-  enCours = false
+    const msgs = {2:'🛵 En route — Bonne route !', 3:'✅ Livraison confirmée !', 4:'❌ Échec enregistré'}
+    showToast(msgs[nouveauStatut]||'Statut mis à jour')
+  } catch { showToast('❌ Pas de connexion — réessaie') }
+  enCours=false
 }
 
-// ── Charger la livraison ──────────────────────────
 async function load() {
-  if (!code) {
-    document.getElementById('app').innerHTML = `
-      <div class="error-box">
-        <h3>Lien invalide</h3>
-        <p>Ce lien n'est pas valide.<br>Demande un nouveau lien au vendeur.</p>
-      </div>`
-    return
-  }
-
-  const { data, error } = await sb
-    .from('livraisons')
-    .select('*')
-    .eq('code', code)
-    .single()
-
-  if (error || !data) {
-    document.getElementById('app').innerHTML = `
-      <div class="error-box">
-        <h3>Commande introuvable</h3>
-        <p>Aucune commande pour le code <strong>${code}</strong>.<br>Vérifie le lien reçu.</p>
-      </div>`
-    return
-  }
-
+  if (!code) { document.getElementById('app').innerHTML=`<div class="error-box"><h3>Lien invalide</h3><p>Demande un nouveau lien au vendeur.</p></div>`; return }
+  const { data, error } = await sb.from('livraisons').select('*').eq('code',code).single()
+  if (error||!data) { document.getElementById('app').innerHTML=`<div class="error-box"><h3>Commande introuvable</h3><p>Vérifie le lien reçu.</p></div>`; return }
   render(data)
 }
-
 load()
 </script>
 </body>

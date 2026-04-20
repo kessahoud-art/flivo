@@ -4,14 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flivo — Connexion</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff5c1a">
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#0f0f12; --card:#18181f; --border:#2a2a36;
-    --orange:#ff6b2b; --orange-soft:rgba(255,107,43,0.12);
-    --green:#22c55e; --text:#f0ede8; --muted:#7a7890; --radius:18px;
+    --bg:#f8f7f4; --white:#ffffff; --orange:#ff5c1a;
+    --orange-soft:rgba(255,92,26,0.08); --orange-border:rgba(255,92,26,0.2);
+    --green:#16a34a; --green-soft:#f0fdf4;
+    --red:#dc2626; --border:#e5e2da;
+    --text:#1a1814; --muted:#6b6860; --radius:14px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -20,147 +24,86 @@
     display:flex; flex-direction:column;
     align-items:center; justify-content:center; padding:24px;
   }
-  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:2rem; color:var(--orange); margin-bottom:6px; }
-  .tagline { font-size:0.82rem; color:var(--muted); margin-bottom:36px; text-align:center; }
-
+  .logo { font-family:'Syne',sans-serif; font-weight:900; font-size:2.2rem; color:var(--orange); margin-bottom:4px; }
+  .tagline { font-size:0.8rem; color:var(--muted); margin-bottom:32px; text-align:center; }
   .card {
-    width:100%; max-width:380px; background:var(--card);
-    border:1px solid var(--border); border-radius:var(--radius); padding:28px;
+    width:100%; max-width:380px; background:var(--white);
+    border:1px solid var(--border); border-radius:var(--radius);
+    padding:28px; box-shadow:0 2px 12px rgba(0,0,0,0.06);
   }
-  .card-title { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:700; margin-bottom:4px; }
-  .card-sub { font-size:0.78rem; color:var(--muted); margin-bottom:24px; }
-
-  .tabs {
-    display:flex; background:rgba(255,255,255,0.04);
-    border-radius:10px; padding:4px; margin-bottom:24px; gap:4px;
-  }
-  .tab {
-    flex:1; padding:9px; border:none; background:transparent;
-    color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.82rem;
-    font-weight:500; border-radius:8px; cursor:pointer; transition:all 0.2s;
-  }
-  .tab.active { background:var(--orange); color:#fff; font-weight:600; }
-
-  .field { margin-bottom:16px; }
-  .field label { display:block; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:6px; }
-  .field input {
-    width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border);
-    border-radius:10px; padding:13px 14px; color:var(--text);
-    font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none;
-    transition:border-color 0.2s;
-  }
-  .field input:focus { border-color:var(--orange); }
+  .card-title { font-family:'Syne',sans-serif; font-size:1.15rem; font-weight:800; margin-bottom:4px; }
+  .card-sub { font-size:0.76rem; color:var(--muted); margin-bottom:22px; }
+  .tabs { display:flex; background:var(--bg); border-radius:10px; padding:3px; margin-bottom:22px; gap:3px; }
+  .tab { flex:1; padding:9px; border:none; background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:500; border-radius:8px; cursor:pointer; transition:all 0.2s; }
+  .tab.active { background:var(--orange); color:#fff; font-weight:700; }
+  .field { margin-bottom:14px; }
+  .field label { display:block; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:5px; font-weight:600; }
+  .field input { width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.88rem; outline:none; transition:border-color 0.2s; }
+  .field input:focus { border-color:var(--orange); background:var(--white); }
   .field input::placeholder { color:var(--muted); }
-
-  .submit-btn {
-    width:100%; padding:15px; background:var(--orange); border:none;
-    border-radius:12px; color:#fff; font-family:'Syne',sans-serif;
-    font-weight:700; font-size:0.95rem; cursor:pointer;
-    transition:opacity 0.2s, transform 0.15s; margin-top:4px;
-  }
-  .submit-btn:hover { opacity:0.9; transform:translateY(-1px); }
+  .submit-btn { width:100%; padding:14px; background:var(--orange); border:none; border-radius:11px; color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.92rem; cursor:pointer; transition:all 0.2s; margin-top:4px; box-shadow:0 4px 14px rgba(255,92,26,0.25); }
+  .submit-btn:hover { opacity:0.92; transform:translateY(-1px); }
   .submit-btn:disabled { opacity:0.5; pointer-events:none; }
-
-  .msg {
-    margin-top:14px; padding:11px 14px; border-radius:10px;
-    font-size:0.8rem; text-align:center; display:none;
-  }
-  .msg.error { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#ef4444; display:block; }
-  .msg.success { background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); color:var(--green); display:block; }
-
-  .footer-note { font-size:0.72rem; color:var(--muted); text-align:center; margin-top:20px; }
+  .forgot-link { display:block; text-align:center; margin-top:12px; font-size:0.76rem; color:var(--muted); text-decoration:none; }
+  .forgot-link:hover { color:var(--orange); }
+  .msg { margin-top:12px; padding:10px 13px; border-radius:10px; font-size:0.78rem; display:none; }
+  .msg.error { background:#fef2f2; border:1px solid rgba(220,38,38,0.2); color:var(--red); display:block; }
+  .msg.success { background:var(--green-soft); border:1px solid rgba(22,163,74,0.2); color:var(--green); display:block; }
+  .footer-note { font-size:0.7rem; color:var(--muted); text-align:center; margin-top:18px; max-width:320px; }
 </style>
 </head>
 <body>
-
 <div class="logo" id="appName">Flivo</div>
 <div class="tagline">Suivi de livraisons pour vendeurs africains</div>
-
 <div class="card">
   <div class="card-title">Espace vendeur</div>
   <div class="card-sub">Connecte-toi pour gérer tes livraisons</div>
-
   <div class="tabs">
     <button class="tab active" onclick="switchTab('login')">Connexion</button>
     <button class="tab" onclick="switchTab('register')">Inscription</button>
   </div>
-
-  <!-- Formulaire Connexion -->
   <div id="formLogin">
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="toi@email.com">
-    </div>
-    <div class="field">
-      <label>Mot de passe</label>
-      <input type="password" id="loginPassword" placeholder="••••••••">
-    </div>
+    <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="toi@email.com"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
     <button class="submit-btn" id="loginBtn" onclick="login()">Se connecter</button>
+    <a class="forgot-link" href="reset-password.html">Mot de passe oublié ?</a>
     <div class="msg" id="loginMsg"></div>
   </div>
-
-  <!-- Formulaire Inscription -->
   <div id="formRegister" style="display:none">
-    <div class="field">
-      <label>Nom de ta boutique</label>
-      <input type="text" id="regBoutique" placeholder="Awa Fashion, Aliou Store...">
-    </div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="regEmail" placeholder="toi@email.com">
-    </div>
-    <div class="field">
-      <label>Téléphone (avec indicatif)</label>
-      <input type="tel" id="regPhone" placeholder="2250708000000">
-    </div>
-    <div class="field">
-      <label>Mot de passe</label>
-      <input type="password" id="regPassword" placeholder="Min. 6 caractères">
-    </div>
+    <div class="field"><label>Nom de ta boutique</label><input type="text" id="regBoutique" placeholder="Awa Fashion, Aliou Store..."></div>
+    <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="toi@email.com"></div>
+    <div class="field"><label>Téléphone (avec indicatif)</label><input type="tel" id="regPhone" placeholder="2290708000000"></div>
+    <div class="field"><label>Mot de passe</label><input type="password" id="regPassword" placeholder="Min. 6 caractères"></div>
     <button class="submit-btn" id="registerBtn" onclick="register()">Créer mon compte</button>
     <div class="msg" id="registerMsg"></div>
   </div>
 </div>
-
-<div class="footer-note">En t'inscrivant tu acceptes les conditions d'utilisation de Flivo</div>
+<div class="footer-note">En t'inscrivant tu acceptes les <a href="mentions-legales.html" style="color:var(--orange)">conditions d'utilisation</a> de Flivo</div>
 
 <script>
 const sb = window.supabase.createClient(FLIVO_CONFIG.supabase_url, FLIVO_CONFIG.supabase_anon_key)
 document.getElementById('appName').textContent = FLIVO_CONFIG.app_name
-
-// Si déjà connecté → rediriger
-sb.auth.getSession().then(({ data }) => {
-  if (data.session) window.location.href = 'dashboard.html'
-})
+sb.auth.getSession().then(({ data }) => { if (data.session) window.location.href = 'dashboard.html' })
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register')))
-  document.getElementById('formLogin').style.display    = tab === 'login'    ? 'block' : 'none'
-  document.getElementById('formRegister').style.display = tab === 'register' ? 'block' : 'none'
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')))
+  document.getElementById('formLogin').style.display    = tab==='login'    ? 'block' : 'none'
+  document.getElementById('formRegister').style.display = tab==='register' ? 'block' : 'none'
 }
 
 function showMsg(id, msg, type) {
   const el = document.getElementById(id)
-  el.textContent = msg
-  el.className = 'msg ' + type
+  el.textContent = msg; el.className = 'msg ' + type
 }
 
 async function login() {
-  const email    = document.getElementById('loginEmail').value.trim()
+  const email = document.getElementById('loginEmail').value.trim()
   const password = document.getElementById('loginPassword').value
-  if (!email || !password) return showMsg('loginMsg', 'Remplis tous les champs', 'error')
-
+  if (!email || !password) return showMsg('loginMsg','Remplis tous les champs','error')
   const btn = document.getElementById('loginBtn')
-  btn.disabled = true
-  btn.textContent = 'Connexion...'
-
+  btn.disabled = true; btn.textContent = 'Connexion...'
   const { error } = await sb.auth.signInWithPassword({ email, password })
-  if (error) {
-    showMsg('loginMsg', 'Email ou mot de passe incorrect', 'error')
-    btn.disabled = false
-    btn.textContent = 'Se connecter'
-    return
-  }
+  if (error) { showMsg('loginMsg','Email ou mot de passe incorrect','error'); btn.disabled=false; btn.textContent='Se connecter'; return }
   window.location.href = 'dashboard.html'
 }
 
@@ -169,37 +112,20 @@ async function register() {
   const email    = document.getElementById('regEmail').value.trim()
   const phone    = document.getElementById('regPhone').value.trim()
   const password = document.getElementById('regPassword').value
-
-  if (!boutique || !email || !phone || !password) return showMsg('registerMsg', 'Remplis tous les champs', 'error')
-  if (password.length < 6) return showMsg('registerMsg', 'Mot de passe trop court (min. 6)', 'error')
-
+  if (!boutique||!email||!phone||!password) return showMsg('registerMsg','Remplis tous les champs','error')
+  if (password.length < 6) return showMsg('registerMsg','Mot de passe trop court (min. 6)','error')
   const btn = document.getElementById('registerBtn')
-  btn.disabled = true
-  btn.textContent = 'Création...'
-
+  btn.disabled = true; btn.textContent = 'Création...'
   const { data, error } = await sb.auth.signUp({ email, password })
-  if (error) {
-    showMsg('registerMsg', error.message, 'error')
-    btn.disabled = false
-    btn.textContent = 'Créer mon compte'
-    return
-  }
-
-  // Créer le vendeur dans la table vendeurs
+  if (error) { showMsg('registerMsg', error.message,'error'); btn.disabled=false; btn.textContent='Créer mon compte'; return }
   if (data.user) {
     await sb.from('vendeurs').insert({
-      id: data.user.id,
-      email,
-      nom_boutique: boutique,
-      phone,
-      plan: 'free',
-      livraisons_ce_mois: 0
+      id: data.user.id, email, nom_boutique: boutique, phone,
+      plan:'free', deliveries_count:0, has_used_free_trial:true, free_blocked:false
     })
   }
-
-  showMsg('registerMsg', '✅ Compte créé ! Vérifie ton email pour confirmer.', 'success')
-  btn.disabled = false
-  btn.textContent = 'Créer mon compte'
+  showMsg('registerMsg','✅ Compte créé ! Vérifie ton email pour confirmer.','success')
+  btn.disabled=false; btn.textContent='Créer mon compte'
 }
 </script>
 </body>

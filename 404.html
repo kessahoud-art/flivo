@@ -4,49 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flivo — Page introuvable</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#0f0f12; --orange:#ff6b2b; --orange-soft:rgba(255,107,43,0.12);
-    --text:#f0ede8; --muted:#7a7890; --border:#2a2a36; --card:#18181f;
-  }
+  :root { --bg:#f8f7f4; --orange:#ff5c1a; --text:#1a1814; --muted:#6b6860; --border:#e5e2da; }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background:var(--bg); color:var(--text);
-    font-family:'DM Sans',sans-serif; min-height:100vh;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center;
-    padding:24px; text-align:center;
-    position:relative; overflow:hidden;
-  }
-  body::before {
-    content:'404';
-    position:absolute; font-family:'Syne',sans-serif; font-weight:900;
-    font-size:40vw; color:rgba(255,107,43,0.04);
-    top:50%; left:50%; transform:translate(-50%,-50%);
-    pointer-events:none; user-select:none; white-space:nowrap;
-  }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; position:relative; overflow:hidden; }
+  body::before { content:'404'; position:absolute; font-family:'Syne',sans-serif; font-weight:900; font-size:40vw; color:rgba(255,92,26,0.05); top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
   .content { position:relative; z-index:1; max-width:360px; }
-  .icon { font-size:3.5rem; margin-bottom:16px; animation:bounce 2s infinite; }
-  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-  .title { font-family:'Syne',sans-serif; font-weight:900; font-size:1.6rem; margin-bottom:10px; }
+  .icon { font-size:3.5rem; margin-bottom:14px; animation:bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)} }
+  .title { font-family:'Syne',sans-serif; font-weight:900; font-size:1.5rem; margin-bottom:8px; }
   .title span { color:var(--orange); }
-  .sub { font-size:0.85rem; color:var(--muted); line-height:1.6; margin-bottom:28px; }
-  .btn-home {
-    display:inline-flex; align-items:center; gap:8px;
-    background:var(--orange); color:#fff;
-    padding:14px 26px; border-radius:12px;
-    font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem;
-    text-decoration:none; transition:all 0.2s; margin-bottom:12px;
-    box-shadow:0 8px 24px rgba(255,107,43,0.3);
-  }
-  .btn-home:hover { opacity:0.9; transform:translateY(-2px); }
-  .btn-back {
-    display:block; font-size:0.78rem; color:var(--muted);
-    text-decoration:none; transition:color 0.2s;
-  }
+  .sub { font-size:0.82rem; color:var(--muted); line-height:1.6; margin-bottom:26px; }
+  .btn-home { display:inline-flex; align-items:center; gap:8px; background:var(--orange); color:#fff; padding:14px 26px; border-radius:12px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.88rem; text-decoration:none; margin-bottom:10px; box-shadow:0 4px 14px rgba(255,92,26,0.2); transition:all 0.2s; }
+  .btn-home:hover { opacity:0.92; transform:translateY(-1px); }
+  .btn-back { display:block; font-size:0.76rem; color:var(--muted); text-decoration:none; }
   .btn-back:hover { color:var(--orange); }
-  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1rem; color:var(--orange); position:absolute; top:20px; left:22px; text-decoration:none; }
+  .logo { font-family:'Syne',sans-serif; font-weight:900; font-size:1rem; color:var(--orange); position:absolute; top:20px; left:22px; text-decoration:none; }
 </style>
 </head>
 <body>
@@ -54,7 +28,7 @@
   <div class="content">
     <div class="icon">📦</div>
     <h1 class="title">Cette page n'a pas été <span>livrée</span></h1>
-    <p class="sub">Le lien que tu cherches n'existe pas ou a été déplacé. Pas de panique — retourne à l'accueil.</p>
+    <p class="sub">Le lien que tu cherches n'existe pas ou a été déplacé.</p>
     <a class="btn-home" href="index.html">🏠 Retour à l'accueil</a>
     <a class="btn-back" href="javascript:history.back()">← Page précédente</a>
   </div>

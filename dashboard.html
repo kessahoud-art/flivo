@@ -5,247 +5,123 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flivo — Dashboard</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#ff6b2b">
+<meta name="theme-color" content="#ff5c1a">
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#0f0f12; --card:#18181f; --border:#2a2a36;
-    --orange:#ff6b2b; --orange-soft:rgba(255,107,43,0.12);
-    --green:#22c55e; --green-soft:rgba(34,197,94,0.1);
-    --red:#ef4444; --red-soft:rgba(239,68,68,0.1);
-    --blue:#3b82f6; --yellow:#f59e0b;
-    --text:#f0ede8; --muted:#7a7890; --radius:18px;
+    --bg:#f8f7f4; --white:#ffffff; --orange:#ff5c1a;
+    --orange-soft:rgba(255,92,26,0.08); --orange-border:rgba(255,92,26,0.2);
+    --green:#16a34a; --green-soft:#f0fdf4; --green-border:rgba(22,163,74,0.2);
+    --red:#dc2626; --red-soft:#fef2f2;
+    --blue:#2563eb; --blue-soft:#eff6ff;
+    --yellow:#d97706; --border:#e5e2da;
+    --text:#1a1814; --muted:#6b6860; --card:#ffffff; --radius:14px;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:100%; overflow-x:hidden; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding:0 0 90px; }
 
-  html, body {
-    width:100%; overflow-x:hidden;
-  }
-
-  body {
-    background:var(--bg); color:var(--text);
-    font-family:'DM Sans',sans-serif;
-    min-height:100vh;
-    padding:0 0 90px;
-  }
-
-  /* Topbar */
-  .topbar {
-    width:100%; display:flex; align-items:center;
-    justify-content:space-between;
-    padding:18px 16px 0;
-  }
-  .logo { font-family:'Syne',sans-serif; font-weight:800; font-size:1.05rem; color:var(--orange); flex-shrink:0; }
-  .logout-btn {
-    font-size:0.72rem; color:var(--muted); background:var(--card);
-    border:1px solid var(--border); padding:6px 12px; border-radius:30px;
-    cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif;
-    flex-shrink:0; white-space:nowrap;
-  }
+  .topbar { width:100%; display:flex; align-items:center; justify-content:space-between; padding:16px 16px 0; background:var(--white); border-bottom:1px solid var(--border); }
+  .logo { font-family:'Syne',sans-serif; font-weight:900; font-size:1.1rem; color:var(--orange); }
+  .logout-btn { font-size:0.72rem; color:var(--muted); background:var(--bg); border:1px solid var(--border); padding:6px 12px; border-radius:20px; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
   .logout-btn:hover { color:var(--red); border-color:var(--red); }
 
-  /* Wrapper centré */
-  .page-content {
-    width:100%; max-width:480px;
-    margin:0 auto;
-    padding:0 16px;
-  }
+  .page-content { width:100%; max-width:480px; margin:0 auto; padding:0 14px; }
 
-  /* Header vendeur */
-  .header {
-    display:flex; align-items:center;
-    justify-content:space-between;
-    margin-top:18px; gap:10px;
-  }
+  .header { display:flex; align-items:center; justify-content:space-between; margin-top:16px; gap:10px; }
   .header-left { flex:1; min-width:0; }
-  .bonjour { font-size:0.75rem; color:var(--muted); margin-bottom:2px; }
-  .boutique-name {
-    font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .plan-badge {
-    font-size:0.7rem; font-weight:600; flex-shrink:0;
-    padding:5px 11px; border-radius:30px;
-    background:var(--orange-soft); color:var(--orange);
-    border:1px solid rgba(255,107,43,0.25);
-  }
-  .plan-badge.pro { background:var(--green-soft); color:var(--green); border-color:rgba(34,197,94,0.25); }
+  .bonjour { font-size:0.72rem; color:var(--muted); margin-bottom:2px; }
+  .boutique-name { font-family:'Syne',sans-serif; font-size:1.15rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .plan-badge { font-size:0.68rem; font-weight:700; padding:4px 11px; border-radius:20px; flex-shrink:0; }
+  .plan-badge.free     { background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+  .plan-badge.pro      { background:var(--orange-soft); color:var(--orange); border:1px solid var(--orange-border); }
+  .plan-badge.business { background:var(--blue-soft); color:var(--blue); border:1px solid rgba(37,99,235,0.2); }
+  .plan-badge.blocked  { background:var(--red-soft); color:var(--red); border:1px solid rgba(220,38,38,0.2); }
 
-  /* Stats */
-  .stats {
-    display:grid; grid-template-columns:repeat(3,1fr);
-    gap:8px; margin-top:14px;
-  }
-  .stat-card {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:14px; padding:12px 10px; min-width:0;
-  }
-  .stat-val { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; margin-bottom:2px; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px; }
+  .stat-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:12px 10px; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+  .stat-val { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:900; margin-bottom:2px; }
   .stat-val.orange { color:var(--orange); }
   .stat-val.green  { color:var(--green); }
   .stat-val.blue   { color:var(--blue); }
-  .stat-label { font-size:0.63rem; color:var(--muted); line-height:1.3; }
+  .stat-label { font-size:0.62rem; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
 
-  /* Quota bar */
-  .quota-bar-wrap {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:12px; padding:12px 14px; margin-top:8px;
-  }
-  .quota-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-  .quota-label { font-size:0.7rem; color:var(--muted); }
-  .quota-count { font-size:0.7rem; font-weight:600; color:var(--orange); }
-  .quota-bar { height:5px; background:var(--border); border-radius:10px; overflow:hidden; }
+  .quota-bar-wrap { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:12px 14px; margin-top:8px; }
+  .quota-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+  .quota-label { font-size:0.7rem; color:var(--muted); font-weight:500; }
+  .quota-count { font-size:0.7rem; font-weight:700; color:var(--orange); }
+  .quota-bar { height:5px; background:var(--bg); border-radius:10px; overflow:hidden; border:1px solid var(--border); }
   .quota-fill { height:100%; background:var(--orange); border-radius:10px; transition:width 0.5s ease; }
   .quota-fill.danger { background:var(--red); }
 
-  /* Bouton nouvelle livraison */
-  .new-btn {
-    display:flex; align-items:center; justify-content:center; gap:10px;
-    width:100%; margin-top:14px;
-    padding:15px; background:var(--orange); border-radius:14px;
-    color:#fff; font-family:'Syne',sans-serif; font-weight:700;
-    font-size:0.92rem; text-decoration:none; border:none; cursor:pointer;
-    transition:opacity 0.2s, transform 0.15s;
-  }
-  .new-btn:hover { opacity:0.9; transform:translateY(-1px); }
+  .new-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:12px; padding:15px; background:var(--orange); border-radius:var(--radius); color:#fff; font-family:'Syne',sans-serif; font-weight:700; font-size:0.92rem; text-decoration:none; border:none; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 14px rgba(255,92,26,0.2); }
+  .new-btn:hover { opacity:0.92; transform:translateY(-1px); }
 
-  /* Bouton upgrade */
-  .upgrade-btn {
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    width:100%; margin-top:8px;
-    padding:12px; background:transparent;
-    border:1px dashed rgba(255,107,43,0.4); border-radius:14px;
-    color:var(--orange); font-family:'Syne',sans-serif; font-weight:600;
-    font-size:0.82rem; text-decoration:none; cursor:pointer;
-    transition:all 0.2s;
-  }
-  .upgrade-btn:hover { background:var(--orange-soft); border-style:solid; }
+  .upgrade-banner { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; margin-top:8px; padding:12px 14px; background:var(--orange-soft); border:1px solid var(--orange-border); border-radius:12px; text-decoration:none; color:var(--orange); font-size:0.78rem; font-weight:600; }
 
-  /* Filtres */
-  .filters {
-    display:flex; gap:6px; overflow-x:auto;
-    padding:14px 0 4px; scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-  }
+  .filters { display:flex; gap:6px; overflow-x:auto; padding:12px 0 4px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
   .filters::-webkit-scrollbar { display:none; }
-  .filter-btn {
-    flex-shrink:0; padding:7px 12px; border-radius:30px;
-    border:1px solid var(--border); background:transparent;
-    color:var(--muted); font-size:0.72rem; font-family:'DM Sans',sans-serif;
-    cursor:pointer; transition:all 0.2s; white-space:nowrap;
-  }
-  .filter-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; font-weight:600; }
+  .filter-btn { flex-shrink:0; padding:6px 12px; border-radius:20px; border:1.5px solid var(--border); background:var(--white); color:var(--muted); font-size:0.72rem; cursor:pointer; transition:all 0.2s; white-space:nowrap; font-family:'DM Sans',sans-serif; font-weight:500; }
+  .filter-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; font-weight:700; }
 
-  /* Section label */
-  .section-label {
-    font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em;
-    color:var(--muted); margin:4px 0 10px;
-  }
+  .section-label { font-size:0.62rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin:12px 0 8px; font-weight:600; }
 
-  /* Liste livraisons */
   .liste { display:flex; flex-direction:column; gap:8px; }
-
-  .liv-card {
-    background:var(--card); border:1px solid var(--border);
-    border-radius:14px; padding:14px 12px;
-    display:flex; align-items:flex-start; gap:10px;
-    transition:border-color 0.2s;
-  }
-  .liv-card:hover { border-color:rgba(255,107,43,0.3); }
-
-  .liv-statut-dot {
-    width:9px; height:9px; border-radius:50%;
-    flex-shrink:0; margin-top:5px;
-  }
-  .dot-0 { background:var(--muted); }
+  .liv-card { background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:14px 12px; display:flex; align-items:flex-start; gap:10px; transition:all 0.15s; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+  .liv-card:hover { border-color:var(--orange-border); box-shadow:0 2px 8px rgba(255,92,26,0.1); }
+  .liv-statut-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+  .dot-0 { background:#d1d5db; }
   .dot-1 { background:var(--yellow); }
-  .dot-2 { background:var(--orange); animation:pulse 1.5s infinite; }
+  .dot-2 { background:var(--orange); }
   .dot-3 { background:var(--green); }
   .dot-4 { background:var(--red); }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
   .liv-body { flex:1; min-width:0; }
   .liv-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; gap:6px; }
-  .liv-nom { font-family:'Syne',sans-serif; font-size:0.9rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .liv-code { font-size:0.65rem; color:var(--muted); font-family:monospace; flex-shrink:0; }
-  .liv-adresse { font-size:0.75rem; color:var(--muted); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .liv-nom { font-family:'Syne',sans-serif; font-size:0.88rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .liv-code { font-size:0.62rem; color:var(--muted); font-family:monospace; flex-shrink:0; }
+  .liv-adresse { font-size:0.73rem; color:var(--muted); margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .liv-footer { display:flex; align-items:center; justify-content:space-between; gap:6px; }
-  .liv-montant { font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:700; color:var(--orange); white-space:nowrap; }
-  .liv-statut-label { font-size:0.65rem; font-weight:600; padding:3px 8px; border-radius:20px; white-space:nowrap; }
-  .sl-0 { background:rgba(122,120,144,0.15); color:var(--muted); }
-  .sl-1 { background:rgba(245,158,11,0.1); color:var(--yellow); }
+  .liv-montant { font-family:'Syne',sans-serif; font-size:0.85rem; font-weight:800; color:var(--orange); }
+  .liv-statut-label { font-size:0.62rem; font-weight:700; padding:3px 8px; border-radius:20px; }
+  .sl-0 { background:#f3f4f6; color:#9ca3af; }
+  .sl-1 { background:#fef9c3; color:var(--yellow); }
   .sl-2 { background:var(--orange-soft); color:var(--orange); }
   .sl-3 { background:var(--green-soft); color:var(--green); }
   .sl-4 { background:var(--red-soft); color:var(--red); }
-
   .liv-actions { display:flex; flex-direction:column; gap:5px; flex-shrink:0; }
-  .quick-btn {
-    width:32px; height:32px; border-radius:8px; border:1px solid var(--border);
-    background:rgba(255,255,255,0.04); font-size:0.85rem;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:all 0.2s; text-decoration:none;
-  }
+  .quick-btn { width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-size:0.82rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; text-decoration:none; }
   .quick-btn:hover { border-color:var(--orange); background:var(--orange-soft); }
 
-  /* Empty state */
   .empty { text-align:center; padding:40px 20px; color:var(--muted); }
-  .empty-icon { font-size:2.5rem; margin-bottom:12px; }
-  .empty-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; color:var(--text); margin-bottom:6px; }
-  .empty-sub { font-size:0.78rem; }
+  .empty-icon { font-size:2.5rem; margin-bottom:10px; }
+  .empty-title { font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:5px; }
+  .empty-sub { font-size:0.76rem; }
 
-  /* Loading */
   .loading { display:flex; align-items:center; justify-content:center; padding:60px; }
-  .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
+  .spinner { width:26px; height:26px; border:3px solid var(--border); border-top-color:var(--orange); border-radius:50%; animation:spin 0.8s linear infinite; }
   @keyframes spin { to{transform:rotate(360deg)} }
 
-  /* Bottom nav */
-  .bottom-nav {
-    position:fixed; bottom:0; left:0; right:0;
-    background:var(--card); border-top:1px solid var(--border);
-    display:flex; align-items:center; justify-content:space-around;
-    padding:10px 0 20px; z-index:10;
-  }
-  .nav-btn {
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-    font-size:0.62rem; color:var(--muted); text-decoration:none;
-    cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif;
-    padding:0 16px;
-  }
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--white); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; padding:10px 0 18px; z-index:10; box-shadow:0 -2px 10px rgba(0,0,0,0.06); }
+  .nav-btn { display:flex; flex-direction:column; align-items:center; gap:3px; font-size:0.62rem; color:var(--muted); text-decoration:none; cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; padding:0 16px; font-weight:500; }
   .nav-btn.active { color:var(--orange); }
   .nav-icon { font-size:1.2rem; }
 </style>
 </head>
 <body>
-
-<!-- Topbar -->
 <div class="topbar">
   <div class="logo" id="appName">Flivo</div>
   <button class="logout-btn" onclick="logout()">Déconnexion</button>
 </div>
-
-<!-- Contenu principal -->
 <div class="page-content">
-  <div id="app">
-    <div class="loading"><div class="spinner"></div></div>
-  </div>
+  <div id="app"><div class="loading"><div class="spinner"></div></div></div>
 </div>
-
-<!-- Bottom nav -->
 <div class="bottom-nav">
-  <div class="nav-btn active">
-    <div class="nav-icon">📦</div>
-    Livraisons
-  </div>
-  <a class="nav-btn" href="nouvelle-livraison.html">
-    <div class="nav-icon">➕</div>
-    Nouveau
-  </a>
-  <a class="nav-btn" href="stats.html">
-    <div class="nav-icon">📊</div>
-    Stats
-  </a>
+  <div class="nav-btn active"><div class="nav-icon">📦</div>Livraisons</div>
+  <a class="nav-btn" href="nouvelle-livraison.html"><div class="nav-icon">➕</div>Nouveau</a>
+  <a class="nav-btn" href="stats.html"><div class="nav-icon">📊</div>Stats</a>
+  <a class="nav-btn" href="profil.html"><div class="nav-icon">👤</div>Profil</a>
 </div>
 
 <script>
@@ -253,92 +129,79 @@ const sb = window.supabase.createClient(FLIVO_CONFIG.supabase_url, FLIVO_CONFIG.
 document.getElementById('appName').textContent = FLIVO_CONFIG.app_name
 
 const STATUT_LABELS = ['En attente','Prêt','En route','Livré ✓','Échec']
-let token = null
-let vendeur = null
-let toutes = []
-let filtreActif = 'tous'
+let token=null, vendeur=null, toutes=[], filtreActif='tous'
 
 async function init() {
   const { data } = await sb.auth.getSession()
-  if (!data.session) { window.location.href = 'login.html'; return }
+  if (!data.session) { window.location.href='login.html'; return }
   token = data.session.access_token
 
-  const { data: v } = await sb
-    .from('vendeurs').select('*').eq('id', data.session.user.id).single()
-  vendeur = v
+  const [resV, resStatus] = await Promise.all([
+    sb.from('vendeurs').select('*').eq('id', data.session.user.id).single(),
+    fetch('/api/check-status', { headers:{'Authorization':'Bearer '+token} })
+  ])
+  vendeur = resV.data
+  const status = await resStatus.json()
+
+  // Redirect si bloqué
+  if (status.est_blocked && window.location.pathname !== '/upgrade.html') {
+    // Afficher banner mais ne pas rediriger
+  }
 
   await chargerLivraisons()
 }
 
 async function chargerLivraisons() {
-  const res = await fetch('/api/get-livraisons', {
-    headers: { 'Authorization': 'Bearer ' + token }
-  })
+  const res = await fetch('/api/get-livraisons', { headers:{'Authorization':'Bearer '+token} })
   const data = await res.json()
   toutes = data.livraisons || []
   renderDashboard()
 }
 
-function filtrer(statut) {
-  filtreActif = statut
-  renderDashboard()
-}
+function filtrer(f) { filtreActif=f; renderDashboard() }
 
 function renderDashboard() {
-  const livFiltered = filtreActif === 'tous'
-    ? toutes
-    : toutes.filter(l => String(l.statut) === String(filtreActif))
-
+  const livF    = filtreActif==='tous' ? toutes : toutes.filter(l=>String(l.statut)===String(filtreActif))
   const total   = toutes.length
-  const enRoute = toutes.filter(l => l.statut === 2).length
-  const livrees = toutes.filter(l => l.statut === 3).length
-  const quota   = vendeur?.livraisons_ce_mois || 0
-  const isPro   = vendeur?.plan === 'pro' || vendeur?.plan === 'business'
-  const pct     = isPro ? 0 : Math.min((quota / 20) * 100, 100)
-  const bloque  = !isPro && quota >= 20
+  const enRoute = toutes.filter(l=>l.statut===2).length
+  const livrees = toutes.filter(l=>l.statut===3).length
+  const quota   = vendeur?.deliveries_count || vendeur?.livraisons_ce_mois || 0
+  const plan    = vendeur?.plan || 'free'
+  const isPro   = plan==='pro'||plan==='business'
+  const bloque  = vendeur?.free_blocked || plan==='blocked'
+  const pct     = isPro ? 0 : Math.min((quota/20)*100, 100)
 
   document.getElementById('app').innerHTML = `
-
     <div class="header">
       <div class="header-left">
         <div class="bonjour">Bonjour 👋</div>
-        <div class="boutique-name">${vendeur?.nom_boutique || 'Ma boutique'}</div>
+        <div class="boutique-name">${vendeur?.nom_boutique||'Ma boutique'}</div>
       </div>
-      <div class="plan-badge ${isPro ? 'pro' : ''}">${isPro ? '⭐ Pro' : 'Free'}</div>
+      <div class="plan-badge ${plan}">${plan==='pro'?'⭐ Pro':plan==='business'?'🏢 Business':plan==='blocked'?'🚫 Bloqué':'Free'}</div>
     </div>
 
     <div class="stats">
-      <div class="stat-card">
-        <div class="stat-val orange">${total}</div>
-        <div class="stat-label">Total</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val blue">${enRoute}</div>
-        <div class="stat-label">En route</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val green">${livrees}</div>
-        <div class="stat-label">Livrées</div>
-      </div>
+      <div class="stat-card"><div class="stat-val orange">${total}</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-val blue">${enRoute}</div><div class="stat-label">En route</div></div>
+      <div class="stat-card"><div class="stat-val green">${livrees}</div><div class="stat-label">Livrées</div></div>
     </div>
 
-    ${!isPro ? `
+    ${!isPro && plan!=='blocked' ? `
     <div class="quota-bar-wrap">
       <div class="quota-header">
-        <div class="quota-label">Quota mensuel gratuit</div>
+        <div class="quota-label">Livraisons gratuites utilisées</div>
         <div class="quota-count">${quota} / 20</div>
       </div>
       <div class="quota-bar">
-        <div class="quota-fill ${pct >= 80 ? 'danger' : ''}" style="width:${pct}%"></div>
+        <div class="quota-fill ${pct>=80?'danger':''}" style="width:${pct}%"></div>
       </div>
-    </div>
-    ` : ''}
-
-    <a class="new-btn" href="nouvelle-livraison.html">➕ Nouvelle livraison</a>
+    </div>` : ''}
 
     ${bloque ? `
-    <a class="upgrade-btn" href="upgrade.html">⚡ Quota atteint — Passer au Pro</a>
-    ` : ''}
+    <a class="upgrade-banner" href="upgrade.html">
+      🚫 Compte bloqué — Clique pour passer au Pro →
+    </a>` : `
+    <a class="new-btn" href="nouvelle-livraison.html">➕ Nouvelle livraison</a>`}
 
     <div class="filters">
       <button class="filter-btn ${filtreActif==='tous'?'active':''}" onclick="filtrer('tous')">Toutes (${toutes.length})</button>
@@ -347,52 +210,40 @@ function renderDashboard() {
       <button class="filter-btn ${filtreActif==='4'?'active':''}" onclick="filtrer('4')">❌ Échecs (${toutes.filter(l=>l.statut===4).length})</button>
     </div>
 
-    <div class="section-label">${livFiltered.length} livraison${livFiltered.length !== 1 ? 's' : ''}</div>
-    <div class="liste">
-      ${livFiltered.length === 0 ? `
-        <div class="empty">
-          <div class="empty-icon">📭</div>
-          <div class="empty-title">Aucune livraison ici</div>
-          <div class="empty-sub">Appuie sur ➕ pour commencer</div>
-        </div>
-      ` : livFiltered.map(l => renderCard(l)).join('')}
-    </div>
-  `
-}
-
-function renderCard(l) {
-  const appUrl = FLIVO_CONFIG.app_url
-  const lienClient  = `${appUrl}/track.html?code=${l.code}`
-  const lienLivreur = `${appUrl}/livreur.html?code=${l.code}`
-  const msgClient   = encodeURIComponent(`Bonjour ${l.client_nom} 👋\nSuivez votre livraison ici 👇\n${lienClient}`)
-  const msgLivreur  = encodeURIComponent(`Bonjour ${l.livreur_nom} 👋\nLivraison #${l.code} — ${l.client_nom}\n${l.adresse}\nGère ici 👇\n${lienLivreur}`)
-
-  return `
-    <div class="liv-card">
-      <div class="liv-statut-dot dot-${l.statut}"></div>
-      <div class="liv-body">
-        <div class="liv-header">
-          <div class="liv-nom">${l.client_nom}</div>
-          <div class="liv-code">#${l.code}</div>
-        </div>
-        <div class="liv-adresse">${l.adresse}</div>
-        <div class="liv-footer">
-          <div class="liv-montant">${Number(l.montant).toLocaleString('fr-FR')} FCFA</div>
-          <div class="liv-statut-label sl-${l.statut}">${STATUT_LABELS[l.statut]}</div>
-        </div>
-      </div>
-      <div class="liv-actions">
-        <a class="quick-btn" href="https://wa.me/${l.client_phone}?text=${msgClient}" target="_blank" title="Client">👤</a>
-        <a class="quick-btn" href="https://wa.me/${l.livreur_phone}?text=${msgLivreur}" target="_blank" title="Livreur">🛵</a>
-      </div>
+    <div class="section-label">${livF.length} livraison${livF.length!==1?'s':''}</div>
+    <div class="liste">${livF.length===0?`
+      <div class="empty">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">Aucune livraison ici</div>
+        <div class="empty-sub">Appuie sur ➕ pour commencer</div>
+      </div>` : livF.map(l=>renderCard(l)).join('')}
     </div>`
 }
 
-async function logout() {
-  await sb.auth.signOut()
-  window.location.href = 'login.html'
+function renderCard(l) {
+  const appUrl=FLIVO_CONFIG.app_url
+  const lC=`${appUrl}/track.html?code=${l.code}`
+  const lL=`${appUrl}/livreur.html?code=${l.code}`
+  const mC=encodeURIComponent(`Bonjour ${l.client_nom} 👋\nSuivez votre livraison ici 👇\n${lC}`)
+  const mL=encodeURIComponent(`Bonjour ${l.livreur_nom} 👋\nLivraison #${l.code} — ${l.client_nom}\n${l.adresse}\nGère ici 👇\n${lL}`)
+  return `<div class="liv-card">
+    <div class="liv-statut-dot dot-${l.statut}"></div>
+    <div class="liv-body">
+      <div class="liv-header"><div class="liv-nom">${l.client_nom}</div><div class="liv-code">#${l.code}</div></div>
+      <div class="liv-adresse">${l.adresse}</div>
+      <div class="liv-footer">
+        <div class="liv-montant">${Number(l.montant).toLocaleString('fr-FR')} FCFA</div>
+        <div class="liv-statut-label sl-${l.statut}">${STATUT_LABELS[l.statut]}</div>
+      </div>
+    </div>
+    <div class="liv-actions">
+      <a class="quick-btn" href="https://wa.me/${l.client_phone}?text=${mC}" target="_blank" title="Client">👤</a>
+      <a class="quick-btn" href="https://wa.me/${l.livreur_phone}?text=${mL}" target="_blank" title="Livreur">🛵</a>
+    </div>
+  </div>`
 }
 
+async function logout() { await sb.auth.signOut(); window.location.href='login.html' }
 init()
 </script>
 </body>
